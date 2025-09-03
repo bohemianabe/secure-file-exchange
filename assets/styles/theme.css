@@ -1,0 +1,91 @@
+/* Light theme */
+:root {
+  /* brand base */
+  --color-bg: #fafaf7;
+  --color-surface: #ffffff;
+  --color-text: #1f2937;
+  --color-border: #e5e7eb;
+
+  /* accents */
+  --color-primary: #3b82f6;
+  --color-secondary: #64748b;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  /* radii/shadows/spacing tokens */
+  --radius: 12px;
+  --shadow-1: 0 6px 20px rgb(0 0 0 / 10%);
+
+  /* Bootstrap variable overrides */
+  --bs-body-bg: var(--color-bg);
+  --bs-body-color: var(--color-text);
+  --bs-border-color: var(--color-border);
+
+  --bs-primary: var(--color-primary);
+  --bs-primary-rgb: 59, 130, 246; /* 3B 82 F6 */
+
+  --bs-secondary: var(--color-secondary);
+  --bs-success: var(--color-success);
+  --bs-warning: var(--color-warning);
+  --bs-danger: var(--color-danger);
+  --bs-danger-rgb: var(--color-danger);
+
+  --app-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+  --app-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+
+  /* Bootstrap overrides */
+  --bs-font-sans-serif: var(--app-font);
+  --bs-body-font-family: var(--app-font);
+
+  .btn-primary {
+    --bs-btn-bg: var(--color-primary);
+    --bs-btn-border-color: var(--color-primary);
+    --bs-btn-hover-bg: #2575f4;
+    --bs-btn-hover-border-color: #2575f4;
+    --bs-btn-active-bg: var(--color-primary);
+    --bs-btn-active-border-color: var(--color-primary);
+    --bs-btn-disabled-bg: #93c5fd;
+    --bs-btn-disabled-border-color: #93c5fd;
+  }
+
+  .btn-primary:active,
+  .btn-primary.active,
+  .show > .btn-primary.dropdown-toggle {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+  }
+
+  .bg-danger {
+    background-color: var(--color-danger) !important;
+  }
+}
+
+body {
+  font-family: var(--app-font);
+  /* Make numbers line up nicely in tables/amounts */
+  font-variant-numeric: tabular-nums;
+}
+
+code,
+kbd,
+pre {
+  font-family: var(--app-mono);
+}
+
+/* Optional dark theme (toggle with data-theme="dark" on <html>) */
+:root[data-theme='dark'] {
+  --color-bg: #0b1220;
+  --color-surface: #111827;
+  --color-text: #e5e7eb;
+  --color-border: #243244;
+
+  --color-primary: #60a5fa; /* a bit brighter for dark */
+  --color-secondary: #94a3b8;
+
+  --bs-body-bg: var(--color-bg);
+  --bs-body-color: var(--color-text);
+  --bs-border-color: var(--color-border);
+  --bs-primary: var(--color-primary);
+  --bs-primary-rgb: 96, 165, 250;
+}

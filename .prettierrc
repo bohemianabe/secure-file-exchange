@@ -1,0 +1,17 @@
+{
+	"trailingComma": "es5",
+	"tabWidth": 4,
+	"semi": true,
+	"printWidth": 180,
+	"singleQuote": true,
+	"phpVersion": "8.0",
+	"endOfLine": "lf",
+	"overrides": [
+		{
+			"files": ["*.html", "*.twig", "*.ts", "*.js", "*.css", "*.scss"],
+			"options": {
+				"tabWidth": 2
+			}
+		}
+	]
+}

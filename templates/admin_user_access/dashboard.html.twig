@@ -1,0 +1,70 @@
+
+{# templates/admin/dashboard.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Dashboard{% endblock title %}
+
+{% block titleBarBtns %}
+{% endblock titleBarBtns %}
+
+{% block body %}
+    <div class="admin-title-bar">
+        <h1 class="h3 mb-3">Welcome, {{ app.user.getUserProfile().getUserFullName() }}!</h1>
+
+        <div class="admin-title-bar-btns text-end">
+
+            <a class="btn btn-primary" href="{{ path('admin_add_firm') }}" data-dynamic-load="true" data-bs-toggle="modal" data-modal-title="" data-bs-target="#adminAddFirmModal">
+            <i class="fas fa-plus me-2"></i> Add New Firm            
+            </a>
+
+            <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#importFirms">Import Firms</button>
+
+        </div>
+
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+    </div>
+    <div class="container py-4">
+
+        <table id="myTable" class="table table-striped table-bordered align-middle">
+            <thead>
+                <tr>
+                <th>Id</th>
+                <th>Firm Name</th>
+                <th>Firm Account Name</th>
+                <th>Storage Plan</th>
+                <th>Phone</th>
+                <th>Active</th>
+                <th>Created Date</th>
+                <th>Updated Date</th>
+                <th>View</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for firm in firms %}
+                <tr>
+                    <td>{{ firm.getId() }}</td>
+                    <td>{{ firm.name }}</td>
+                    <td>{{ firm.account }}</td>
+                    <td>{{ firm.storagePlan.Name }}</td>
+                    <td>{{ firm.phone }}</td>
+                    <td>{% if firm.active == true %}Active{% else %}Deactive{% endif %}</td>
+                    <td>{{ firm.createdDate|date('Y-m-d') }}</td>
+                    <td>{{ firm.updatedDate|date('Y-m-d') }}</td>
+                    <td>-View Todo-</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# ag: iterate modals needed, passed from the controller #}
+    {% for modal in modals_to_include %}
+        {% include 'layouts/modals/' ~ modal %}
+    {% endfor %}
+
+{% endblock %}
+
+
