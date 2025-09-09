@@ -10,8 +10,8 @@ class States
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_state', nullable: false, type: 'integer')]
+    private ?int $idState = null;
 
     #[ORM\Column(length: 2, unique: true)]
     private ?string $code = null;
@@ -21,7 +21,7 @@ class States
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->idState;
     }
 
     public function getCode(): ?string

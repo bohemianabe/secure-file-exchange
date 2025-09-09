@@ -1,15 +1,15 @@
-<div class="modal fade" id="adminAddFirmModal" tabindex="-1" aria-labelledby="addFirmModalLabel" aria-hidden="true">
+<div class="modal fade" id="adminAddFirmModal" tabindex="-1" aria-labelledby="adminAddFirmModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <form method="post" action="">
+      <div method="post" action="">
         <div class="modal-header bg-secondary text-white">
-          <h5 class="modal-title" id="addFirmModalLabel">Add New Firm</h5>
+          <h5 class="modal-title" id="adminAddFirmModalLabel">Add New Firm</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <div class="modal-body">
           {# ag: step 1 #}
-          <div class="step" id="step1">
+          <form class="form-part" id="form-part-1">
 
             <div class="container">
               <div class="row">
@@ -19,11 +19,11 @@
                 </div>
 
                 <div class="mb-3 col-6">
-                  <label for="accountName" class="form-label">Firm Account URL<small>(one word, all lowercase)</small></label>
+                  <label for="account" class="form-label">Firm Account URL<small>(one word, all lowercase)</small></label>
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Dedicated URL path. Ex: www.securefilelogin.com/abcaccountants/login.">
                     <small><i class="fas fa-question-circle"></i></small> 
                   </span>
-                  <input type="text" class="form-control" name="accountName" id="accountName" required>
+                  <input type="text" class="form-control" name="account" id="account" pattern="^[a-z0-9]+$" required>
                 </div>
               </div>
             </div>
@@ -64,9 +64,10 @@
 
                 <div class="mb-3 col-6">
                   <label for="state" class="form-label">State</label>
-                  <select class="form-select" name="state" aria-label="Default select example">
+                  <select class="form-select" name="state" aria-label="Default select example" required>
+                    <option value="" selected>--Select--</option>
                     {% for state in states %}
-                      <option value="{{ state.id }}">{{ state.name|capitalize }}</option>
+                      <option value="{{ state.code }}">{{ state.name|capitalize }}</option>
                     {% endfor %}
                   </select>
                 </div>
@@ -91,12 +92,12 @@
               <div class="row">
                 <div class="mb-3 col-6">
                   <label for="phone" class="form-label">Phone</label>
-                  <input type="text" class="form-control" name="phone" id="phone" required>
+                  <input type="phone" class="form-control" name="phone" id="phone" required>
                 </div>
 
                 <div class="mb-3 col-6">
-                  <label for="logo" class="form-label">Company Logo</label>
-                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Please upload a high res png file with a clear background.">
+                  <label for="logo" class="form-label">Company Logo - MAX SIZE 2M</label>
+                  <span data-bs-toggle="tooltip" data-bs-placement="top" title="Please upload a high res png/jpeg/svg file with a clear background. MAX SIZE 2M">
                     <small><i class="fas fa-question-circle"></i></small> 
                   </span>
                   <input type="file" class="form-control" name="logo" id="logo">
@@ -104,14 +105,86 @@
               </div>
             </div>
 
-          </div>
+          </form>
+
+          {# ag: step 2 add primary user #}
+          <form class="form-part d-none" id="form-part-2">
+              <div class="container">
+                <div class="row">
+                  <div class="mb-3 col-4">
+                    <label for="firstName" class="form-label">First Name</label>
+                    <input type="text" class="form-control" name="firstName" id="firstName" required>
+                  </div>
+
+                  <div class="mb-3 col-4">
+                    <label for="lastName" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" name="lastName" id="lastName" required>
+                  </div>
+                  
+                  <div class="mb-3 col-4">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" name="email" id="email" required>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="container">
+                <div class="row">
+                  <div class="mb-3 col-6">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" name="title" id="title">
+                  </div>
+
+                  <div class="mb-3 col-6">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" name="phone" id="phone" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="container">
+                <div class="row">
+                  <div class="mb-3 col-6">
+                    <label for="userType" class="form-label">User Type</label>
+                    <input class="form-select" name="userType" value="primary" readonly></input>
+                  </div>
+
+
+                  <div class="mb-3 col-6">
+                    <label for="userType" class="form-label">Settings</label>
+                    <div class="form-check">
+                      <input class="form-check-input" name="bulkAction" type="checkbox" value="1" id="bulkAction" checked disabled>
+                      <input type="hidden" name="bulkAction" value="1">
+                      <label class="form-check-label" for="bulkAction">
+                        Enable Bulk Action
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" name="seeAllFiles" type="checkbox" value="1" id="seeAllFiles" checked disabled>
+                      <input type="hidden" name="seeAllFiles" value="1">
+                      <label class="form-check-label" for="seeAllFiles">
+                        Enable See All Files
+                      </label>
+                    </div>
+                    {# ag: hidden input for the role #}
+                    <input type="hidden" id="roles" name="roles" value="ROLE_FIRM">
+                  </div>
+                </div>
+              </div>
+          </form>
         </div>
 
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary slide-user-btn">Add User<i class="fas fa-caret-right"></i></button>
+          <button type="submit" class="btn btn-primary admin-add-primary-user" id="admin-add-primary-user">Add User<i class="fas fa-caret-right"></i></button>
+          <button type="submit" class="btn btn-warning d-none" id="admin-new-firm-return-to-form1"><i class="fas fa-caret-left"></i>Back</button>
+          <button type="submit" class="btn btn-primary d-none" id="admin-new-firm-submit">Submit</button>
+          <input type="hidden" id="admin-new-firm-token" name="firm[_token]" value="{{ csrf_token('firm') }}">
+          <input type="hidden" id="admin-new-user-token" name="user[_token]" value="{{ csrf_token('user') }}">
+          <input type="hidden" id="admin-new-firm-user-profile-token" name="firm_user_profile[_token]" value="{{ csrf_token('firm_user_profile') }}">
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>

@@ -13,8 +13,8 @@ class StoragePlans
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_storage_plan', nullable: false, type: 'integer')]
+    private ?int $idStoragePlan = null;
 
     #[ORM\Column(name: 'name', type: 'string', length: 64, nullable: false)]
     private ?string $name = null;
@@ -39,7 +39,7 @@ class StoragePlans
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->idStoragePlan;
     }
 
     public function getName(): ?string

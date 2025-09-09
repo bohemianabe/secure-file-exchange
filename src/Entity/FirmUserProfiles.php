@@ -12,8 +12,8 @@ class FirmUserProfiles
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_firm_user_profile', nullable: false, type: 'integer')]
+    private ?int $idFirmUserProfile = null;
 
     #[ORM\Column(name: 'first_name', type: 'string', length: 64, nullable: true)]
     private ?string $firstName = null;
@@ -28,10 +28,10 @@ class FirmUserProfiles
     private ?string $phone = null;
 
     #[ORM\Column(name: 'bulk_action', type: 'boolean', nullable: true, options: ['default' => true])]
-    private ?bool $bulkAction = null;
+    private ?bool $bulkAction = true;
 
     #[ORM\Column(name: 'see_all_files', type: 'boolean', nullable: true, options: ['default' => true])]
-    private ?bool $seeAllFiles = null;
+    private ?bool $seeAllFiles = true;
 
     // ag: user could be primary, admin accountant, employee
     #[ORM\Column(name: 'user_type', type: 'string', length: 64, nullable: true)]
@@ -46,14 +46,13 @@ class FirmUserProfiles
     private ?\DateTime $updatedDate;
 
     // ag: connects MANY firmUserProfiles TO their ONE designated firm
-    #[ORM\ManyToOne(targetEntity: Firms::class, inversedBy: "firmUserProfiles", cascade: ["persist"])]
-    #[ORM\JoinColumn(name: 'firm_id', referencedColumnName: 'id')]
+    #[ORM\ManyToOne(targetEntity: Firms::class, inversedBy: "firmUserProfiles")]
+    #[ORM\JoinColumn(name: 'firm_id', referencedColumnName: 'id_firm')]
     private ?Firms $firm = null;
 
     // ag: connects One firmUserProfile TO their Many clientUserProfiles
     #[ORM\OneToMany(targetEntity: ClientUserProfiles::class, mappedBy: "firmUserProfiles")]
-    #[ORM\JoinColumn(name: 'firm_id', referencedColumnName: 'id')]
-    private ?Collection $clientUserProfiles = null;
+    private ?Collection $clients = null;
 
     // 1–1 with User (firm user) points to user name w/ email and password
     #[ORM\OneToOne(targetEntity: User::class)]
@@ -63,10 +62,10 @@ class FirmUserProfiles
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->idFirmUserProfile;
     }
 
-    public function getFirmName(): ?string
+    public function getFirstName(): ?string
     {
         return $this->firstName;
     }

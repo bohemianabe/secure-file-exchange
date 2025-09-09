@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
-use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -32,7 +31,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string The hashed password
      */
-    #[ORM\Column(name: 'password', type: 'string', length: 255, nullable: false)]
+    #[ORM\Column(name: 'password', type: 'string', length: 255, nullable: true)]
     private ?string $password = null;
 
     #[ORM\Column(name: 'is_active', type: 'boolean', nullable: false, options: ['default' => true])]
@@ -46,7 +45,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'updated_date', type: 'datetime', options: ['default' => "CURRENT_TIMESTAMP"])]
     private ?\DateTime $updatedDate;
 
-    // in User.php
+    // ag: to make to the correct profile
     #[ORM\OneToOne(mappedBy: 'user', targetEntity: FirmUserProfiles::class, cascade: ['persist', 'remove'])]
     private ?FirmUserProfiles $firmUserProfile = null;
 
@@ -141,6 +140,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getCreatedDate(): ?\DateTime
+    {
+        return $this->createdDate;
+    }
+
+
     public function setCreatedDate(\DateTime $date)
     {
 
@@ -149,6 +154,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getUpdatedDate(): ?\DateTime
+    {
+        return $this->updatedDate;
+    }
+
 
     public function setUpdatedDate(\DateTime $date)
     {

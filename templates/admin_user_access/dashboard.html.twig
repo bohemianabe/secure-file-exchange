@@ -1,6 +1,6 @@
 
 {# templates/admin/dashboard.html.twig #}
-{% extends 'base.html.twig' %}
+{% extends 'adminBase.html.twig' %}
 
 {% block title %}Admin Dashboard{% endblock title %}
 
@@ -13,10 +13,9 @@
 
         <div class="admin-title-bar-btns text-end">
 
-            <a class="btn btn-primary" href="{{ path('admin_add_firm') }}" data-dynamic-load="true" data-bs-toggle="modal" data-modal-title="" data-bs-target="#adminAddFirmModal">
-            <i class="fas fa-plus me-2"></i> Add New Firm            
+            <a class="btn btn-primary" href="" data-dynamic-load="true" data-bs-toggle="modal" data-modal-title="" data-bs-target="#adminAddFirmModal">
+                <i class="fas fa-plus me-2"></i> Add New Firm            
             </a>
-
             <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#importFirms">Import Firms</button>
 
         </div>
@@ -46,13 +45,13 @@
                 {% for firm in firms %}
                 <tr>
                     <td>{{ firm.getId() }}</td>
-                    <td>{{ firm.name }}</td>
-                    <td>{{ firm.account }}</td>
-                    <td>{{ firm.storagePlan.Name }}</td>
-                    <td>{{ firm.phone }}</td>
-                    <td>{% if firm.active == true %}Active{% else %}Deactive{% endif %}</td>
-                    <td>{{ firm.createdDate|date('Y-m-d') }}</td>
-                    <td>{{ firm.updatedDate|date('Y-m-d') }}</td>
+                    <td>{{ firm.getName() }}</td>
+                    <td>{{ firm.getAccount() }}</td>
+                    <td>{{ firm.getStoragePlan().name }}</td>
+                    <td>{{ firm.getPhone() }}</td>
+                    <td>{% if firm.getActive() == true %}Active{% else %}Deactive{% endif %}</td>
+                    <td>{{ firm.getCreatedDate()|date('Y-m-d') }}</td>
+                    <td>{{ firm.getUpdatedDate()|date('Y-m-d') }}</td>
                     <td>-View Todo-</td>
                 </tr>
                 {% endfor %}

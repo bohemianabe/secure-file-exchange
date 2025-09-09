@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ClientsRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -11,8 +12,8 @@ class Clients
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_client', nullable: false, type: 'integer')]
+    private ?int $idClient = null;
 
     #[ORM\Column(name: 'name', type: 'string', length: 128)]
     private ?string $name = null;
@@ -26,12 +27,8 @@ class Clients
     #[ORM\Column(name: 'city', type: 'string', length: 64, nullable: true)]
     private ?string $city = null;
 
-    // #[ORM\Column(name: 'state', type: 'string', length: 64, nullable: true)]
-    // private ?string $state = null;
-
-    #[ORM\ManyToOne(targetEntity: States::class)]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
-    private ?States $state = null;
+    #[ORM\Column(name: 'state', type: 'string', length: 16, nullable: true)]
+    private ?string $state = null;
 
     #[ORM\Column(name: 'zip', type: 'string', length: 64, nullable: true)]
     private ?string $zip = null;
@@ -58,12 +55,16 @@ class Clients
     private ?\DateTime $updatedDate;
 
     #[ORM\OneToOne(targetEntity: Firms::class)]
-    #[ORM\JoinColumn(name: 'firm_id', referencedColumnName: 'id', nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'firm_id', referencedColumnName: 'id_firm', nullable: false, onDelete: 'RESTRICT')]
     private Firms $firm;
+
+    // ag: connects One client TO their Many clientUserProfiles
+    #[ORM\OneToMany(targetEntity: ClientUserProfiles::class, mappedBy: "clients")]
+    private ?Collection $clients = null;
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->idClient;
     }
 
     public function getName(): ?string
@@ -110,7 +111,7 @@ class Clients
     {
         return $this->state;
     }
-    public function setState(?States $state): static
+    public function setState(?string $state): static
     {
         $this->state = $state;
         return $this;

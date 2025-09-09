@@ -28,18 +28,18 @@ class FirmFixture extends Fixture implements DependentFixtureInterface
         $now = new \DateTime();
 
         // ag: set up the storage plans
-        $storagePlan1 = new StoragePlans();
+        // $storagePlan1 = new StoragePlans();
 
-        $storagePlan1->setName('professional')->setStorage('10240.00')->setPrice('25.50')->setCreatedDate($now)->setUpdatedDate($now);
-        $manager->persist($storagePlan1);
+        // $storagePlan1->setName('professional')->setStorage('10240.00')->setPrice('25.50')->setCreatedDate($now)->setUpdatedDate($now);
+        // $manager->persist($storagePlan1);
 
-        $storagePlan2 = new StoragePlans();
-        $storagePlan2->setName('platinum')->setStorage('51200.00')->setPrice('55.50')->setCreatedDate($now)->setUpdatedDate($now);
-        $manager->persist($storagePlan2);
+        // $storagePlan2 = new StoragePlans();
+        // $storagePlan2->setName('platinum')->setStorage('51200.00')->setPrice('55.50')->setCreatedDate($now)->setUpdatedDate($now);
+        // $manager->persist($storagePlan2);
 
-        $storagePlan3 = new StoragePlans();
-        $storagePlan3->setName('platinum plus')->setStorage('102400.00')->setPrice('100.00')->setCreatedDate($now)->setUpdatedDate($now);
-        $manager->persist($storagePlan3);
+        // $storagePlan3 = new StoragePlans();
+        // $storagePlan3->setName('platinum plus')->setStorage('102400.00')->setPrice('100.00')->setCreatedDate($now)->setUpdatedDate($now);
+        // $manager->persist($storagePlan3);
 
         // ag: set up firm
         $firm = new Firms();
@@ -47,7 +47,7 @@ class FirmFixture extends Fixture implements DependentFixtureInterface
         $firm->setName('Abel Accountants')
             ->setAddr1('200 W. Braddock Rd')
             ->setCity('Alexandria')
-            ->setState($this->getReference('state_VA', States::class))
+            ->setState('VA')
             ->setZip('22302')
             ->setCountry('USA')
             ->setPhone('703-548-3008')
@@ -55,7 +55,7 @@ class FirmFixture extends Fixture implements DependentFixtureInterface
             ->setQbbRemovalNum(180)
             ->setCreatedDate($now)
             ->setUpdatedDate($now)
-            ->setStoragePlan($storagePlan3);
+            ->setStoragePlan($this->getReference('professional_plan', StoragePlans::class));
 
         $manager->persist($firm);
 
@@ -96,6 +96,7 @@ class FirmFixture extends Fixture implements DependentFixtureInterface
     public function getDependencies(): array
     {
         return [
+            PlanFixture::class,
             StateFixture::class,
         ];
     }

@@ -11,8 +11,8 @@ class AdminUserProfiles
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_admin_user_profile', nullable: false, type: 'integer')]
+    private ?int $idAdminUserProfile = null;
 
     #[ORM\OneToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
@@ -35,7 +35,7 @@ class AdminUserProfiles
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->idAdminUserProfile;
     }
 
     public function getUser(): ?User

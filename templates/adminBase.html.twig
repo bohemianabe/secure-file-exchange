@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" href="{{ asset('styles/site-wide-styling.css') }}">
     <link rel="stylesheet" href="{{ asset('styles/theme.css') }}">
+    {# <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"> #}
     <title>{% block title %}{{ site_name }}{% endblock %}</title>
 
   {% block styles %}{% endblock %}
@@ -54,6 +55,7 @@
 
   {% block javascripts %}
     {{ encore_entry_script_tags('app') }}
+    {{ encore_entry_script_tags('admin') }}
   {% endblock %}
 </body>
 </html>

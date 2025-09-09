@@ -22,6 +22,9 @@ Encore
    */
   .addEntry('app', './assets/app.js')
 
+  // ag: Admin-specific JS
+  .addEntry('admin', './assets/js/admin/app.js')
+
   // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
   .splitEntryChunks()
 

@@ -3,16 +3,18 @@
 namespace App\Entity;
 
 use App\Repository\FirmsRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 #[ORM\Entity(repositoryClass: FirmsRepository::class)]
 class Firms
 {
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_firm', nullable: false, type: 'integer')]
+    private ?int $idFirm = null;
 
     #[ORM\Column(name: 'name', type: 'string', length: 128)]
     private ?string $name = null;
@@ -26,12 +28,8 @@ class Firms
     #[ORM\Column(name: 'city', type: 'string', length: 64, nullable: true)]
     private ?string $city = null;
 
-    // #[ORM\Column(name: 'state', type: 'string', length: 64, nullable: true)]
-    // private ?string $state = null;
-
-    #[ORM\ManyToOne(targetEntity: States::class)]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
-    private ?States $state = null;
+    #[ORM\Column(name: 'state', type: 'string', length: 16, nullable: true)]
+    private ?string $state = null;
 
     #[ORM\Column(name: 'zip', type: 'string', length: 64, nullable: true)]
     private ?string $zip = null;
@@ -65,14 +63,18 @@ class Firms
     #[ORM\Column(name: 'updated_date', type: 'datetime', options: ['default' => "CURRENT_TIMESTAMP"])]
     private ?\DateTime $updatedDate;
 
-    // ag: connects the MANY client-orgs to ONE clientUserProfile
+    // ag: connects the MANY firms to the ONE Plan
     #[ORM\ManyToOne(targetEntity: StoragePlans::class, inversedBy: 'firms')]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'storage_plan_id', referencedColumnName: 'id_storage_plan', nullable: false, onDelete: 'RESTRICT')]
     private ?StoragePlans $storagePlan;
+
+    // ag: connects One Firm TO their Many firmUserProfiles
+    #[ORM\OneToMany(targetEntity: FirmUserProfiles::class, mappedBy: "firms")]
+    private ?Collection $firmUserProfiles = null;
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->idFirm;
     }
 
     public function getName(): ?string
@@ -119,7 +121,7 @@ class Firms
     {
         return $this->state;
     }
-    public function setState(?States $state): static
+    public function setState(?string $state): static
     {
         $this->state = $state;
         return $this;

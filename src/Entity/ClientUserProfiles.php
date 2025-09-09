@@ -11,8 +11,8 @@ class ClientUserProfiles
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private ?int $id = null;
+    #[ORM\Column(name: 'id_client_user_profile', nullable: false, type: 'integer')]
+    private ?int $idClientUserProfile = null;
 
     #[ORM\Column(name: 'first_name', type: 'string', length: 64, nullable: true)]
     private ?string $firstName = null;
@@ -34,19 +34,19 @@ class ClientUserProfiles
     #[ORM\Column(name: 'updated_date', type: 'datetime', options: ['default' => "CURRENT_TIMESTAMP"])]
     private ?\DateTime $updatedDate;
 
-    // ag: connects the MANY client-orgs to ONE clientUserProfile
+    // ag: connects the MANY clientUserProfile to ONE client-orgs
     #[ORM\ManyToOne(targetEntity: Clients::class)]
-    #[ORM\JoinColumn(name: 'client_id', referencedColumnName: 'id', nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'client_id', referencedColumnName: 'id_client', nullable: false, onDelete: 'RESTRICT')]
     private Clients $client;
 
     // the firm user who owns/manages this client user
     #[ORM\ManyToOne(targetEntity: FirmUserProfiles::class)]
-    #[ORM\JoinColumn(name: 'firm_user_profile_id', referencedColumnName: 'id', nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'firm_user_profile_id', referencedColumnName: 'id_firm_user_profile', nullable: false, onDelete: 'RESTRICT')]
     private FirmUserProfiles $firmUserProfile;
 
     // convenience denormalization if you want fast scoping; optional
     #[ORM\ManyToOne(targetEntity: Firms::class)]
-    #[ORM\JoinColumn(name: 'firm_id', referencedColumnName: 'id', nullable: false, onDelete: 'RESTRICT')]
+    #[ORM\JoinColumn(name: 'firm_id', referencedColumnName: 'id_firm', nullable: false, onDelete: 'RESTRICT')]
     private Firms $firm;
 
     // 1–1 with User (firm user) points to user name w/ email and password
@@ -57,7 +57,7 @@ class ClientUserProfiles
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->idClientUserProfile;
     }
 
     public function getFirmName(): ?string
