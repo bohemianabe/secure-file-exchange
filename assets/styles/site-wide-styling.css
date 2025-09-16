@@ -1,27 +1,33 @@
 body {
-  background: var(--color-accent);
+    background: var(--color-accent);
 }
 .card {
-  border-radius: 1rem;
+    border-radius: 1rem;
 }
 
 header {
-  .nav-link {
-    color: var(--color-secondary);
-  }
+    .nav-link {
+        color: var(--color-secondary);
+    }
 
-  .nav-link:hover {
-    color: var(--color-danger);
-  }
+    .nav-link:hover {
+        color: var(--color-primary);
+    }
 }
 
 footer {
-  color: white;
-  text-shadow: 2px 2px 2px black;
-  z-index: 1;
+    color: white;
+    text-shadow: 2px 2px 2px black;
+    z-index: 1;
 }
 
 /* ag: remove the list dot from header account dropdown */
 li.nav-item.dropdown.ms-auto {
-  list-style: none;
+    list-style: none;
+}
+
+.table-success.primary-row {
+    td {
+        color: #fff !important;
+    }
 }

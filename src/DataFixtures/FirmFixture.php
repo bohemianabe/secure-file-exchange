@@ -27,24 +27,10 @@ class FirmFixture extends Fixture implements DependentFixtureInterface
 
         $now = new \DateTime();
 
-        // ag: set up the storage plans
-        // $storagePlan1 = new StoragePlans();
-
-        // $storagePlan1->setName('professional')->setStorage('10240.00')->setPrice('25.50')->setCreatedDate($now)->setUpdatedDate($now);
-        // $manager->persist($storagePlan1);
-
-        // $storagePlan2 = new StoragePlans();
-        // $storagePlan2->setName('platinum')->setStorage('51200.00')->setPrice('55.50')->setCreatedDate($now)->setUpdatedDate($now);
-        // $manager->persist($storagePlan2);
-
-        // $storagePlan3 = new StoragePlans();
-        // $storagePlan3->setName('platinum plus')->setStorage('102400.00')->setPrice('100.00')->setCreatedDate($now)->setUpdatedDate($now);
-        // $manager->persist($storagePlan3);
-
         // ag: set up firm
-        $firm = new Firms();
+        $firm1 = new Firms();
 
-        $firm->setName('Abel Accountants')
+        $firm1->setName('Abel Accountants')
             ->setAddr1('200 W. Braddock Rd')
             ->setCity('Alexandria')
             ->setState('VA')
@@ -57,37 +43,41 @@ class FirmFixture extends Fixture implements DependentFixtureInterface
             ->setUpdatedDate($now)
             ->setStoragePlan($this->getReference('professional_plan', StoragePlans::class));
 
-        $manager->persist($firm);
+        // ag: add reference for later use in FirmUserProfileFixture
+
+        $manager->persist($firm1);
+        $this->addReference('firm1', $firm1);
 
         // ag: set up user that for firmUserProfile
-        $user = new User();
-        $user->setEmail('agarrido84+firm@gmail.com')
-            ->setRoles(['ROLE_FIRM'])
-            ->setCreatedDate($now)
-            ->setUpdatedDate($now)
-            ->setIsActive(true);
+        // $user = new User();
+        // $user->setEmail('agarrido84+firm@gmail.com')
+        //     ->setRoles(['ROLE_FIRM'])
+        //     ->setCreatedDate($now)
+        //     ->setUpdatedDate($now)
+        //     ->setIsActive(true);
 
-        $hashedPassword = $this->passwordHasher->hashPassword($user, 'supersecret');
-        $user->setPassword($hashedPassword);
+        // $hashedPassword = $this->passwordHasher->hashPassword($user, 'supersecret');
+        // $user->setPassword($hashedPassword);
 
-        $manager->persist($user);
+        // $manager->persist($user);
 
 
         // ag: set up firmUserProfile
-        $firmUserProfile = new FirmUserProfiles();
-        $firmUserProfile->setFirstName('Abel')
-            ->setFirstName('Garrido')
-            ->setTitle('CFO')
-            ->setPhone('703-548-3008 x100')
-            ->setBulkAction(true)
-            ->setSeeAllFiles(true)
-            ->setUserType('primary')
-            ->setCreatedDate($now)
-            ->setUpdatedDate($now)
-            ->setFirm($firm)
-            ->setUser($user);
+        // $firmUserProfile = new FirmUserProfiles();
+        // $firmUserProfile->setFirstName('Abel')
+        //     ->setLastName('Garrido')
+        //     ->setTitle('CFO')
+        //     ->setPhone('703-548-3008 x100')
+        //     ->setBulkAction(true)
+        //     ->setSeeAllFiles(true)
+        //     ->setContactUser(true)
+        //     ->setUserType('primary')
+        //     ->setCreatedDate($now)
+        //     ->setUpdatedDate($now)
+        //     ->setFirm($firm)
+        //     ->setUser($user);
 
-        $manager->persist($firmUserProfile);
+        // $manager->persist($firmUserProfile);
 
         $manager->flush();
     }

@@ -1,8 +1,10 @@
 twig:
-  file_name_pattern: "*.twig"
-  globals:
-    site_name: "%env(string:SITE_NAME)%"
+    file_name_pattern: '*.twig'
+    globals:
+        site_name: '%env(string:SITE_NAME)%'
+        firm_logo_path: '%firm_logo_public_path%'
+        firm_user_types: '%firm.user_types%'
 
 when@test:
-  twig:
-    strict_variables: true
+    twig:
+        strict_variables: true

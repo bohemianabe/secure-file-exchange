@@ -8,7 +8,7 @@
     "endOfLine": "lf",
     "overrides": [
         {
-            "files": ["*.html", "*.twig", "*.ts", "*.js", "*.css", "*.scss"],
+            "files": ["*.html", "*.twig", "*.ts", "*.js", "*.css", "*.scss", "*.html.twig"],
             "options": {
                 "tabWidth": 4
             }

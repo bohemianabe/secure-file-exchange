@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\FirmsRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
@@ -16,7 +17,7 @@ class Firms
     #[ORM\Column(name: 'id_firm', nullable: false, type: 'integer')]
     private ?int $idFirm = null;
 
-    #[ORM\Column(name: 'name', type: 'string', length: 128)]
+    #[ORM\Column(name: 'name', type: 'string', length: 128, unique: true)]
     private ?string $name = null;
 
     #[ORM\Column(name: 'addr_1', type: 'string', length: 64, nullable: true)]
@@ -46,7 +47,7 @@ class Firms
     #[ORM\Column(name: 'active', type: 'boolean', nullable: true, options: ['default' => true])]
     private ?bool $active = true;
 
-    #[ORM\Column(name: 'account', type: 'string', length: 64, nullable: true)]
+    #[ORM\Column(name: 'account', type: 'string', length: 64, nullable: true, unique: true)]
     private ?string $account = null;
 
     #[ORM\Column(name: 'qbb_removal_num', type: 'integer', length: 16, nullable: true, options: ['default' => 30])]
@@ -68,9 +69,41 @@ class Firms
     #[ORM\JoinColumn(name: 'storage_plan_id', referencedColumnName: 'id_storage_plan', nullable: false, onDelete: 'RESTRICT')]
     private ?StoragePlans $storagePlan;
 
-    // ag: connects One Firm TO their Many firmUserProfiles
-    #[ORM\OneToMany(targetEntity: FirmUserProfiles::class, mappedBy: "firms")]
+    // ag: connects One Firm TO their Many firmUserProfiles. note: mappedBy uses signular 'firm' because that's how it's named in the firmUserProfile entity file
+    #[ORM\OneToMany(targetEntity: FirmUserProfiles::class, mappedBy: "firm")]
     private ?Collection $firmUserProfiles = null;
+
+    public function __construct()
+    {
+        $this->firmUserProfiles = new ArrayCollection();
+    }
+
+    // ag: logic to get all firmUserProfiles associated with the firm
+    public function hasFirmUserProfiles(): bool
+    {
+        return $this->firmUserProfiles instanceof Collection && !$this->firmUserProfiles->isEmpty();
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getFirmUserProfiles(): Collection
+    {
+        return new ArrayCollection($this->hasFirmUserProfiles() ? $this->firmUserProfiles->toArray() : []);
+    }
+
+    /**
+     * fetch the firms primary domain
+     *
+     * @return FirmUser
+     */
+    public function hasPrimaryUser(): bool
+    {
+        return $this->hasFirmUserProfiles() && $this->getFirmUserProfiles()->filter(fn($firmUserProfiles) => $firmUserProfiles->isPrimary())->first() instanceof FirmUserProfiles;
+    }
+
+
+    // ***************************** ag: setters and getters below here ******************************************
 
     public function getId(): ?int
     {

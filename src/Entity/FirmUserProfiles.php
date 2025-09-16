@@ -33,9 +33,12 @@ class FirmUserProfiles
     #[ORM\Column(name: 'see_all_files', type: 'boolean', nullable: true, options: ['default' => true])]
     private ?bool $seeAllFiles = true;
 
+    #[ORM\Column(name: 'contact_user', type: 'boolean', nullable: true)]
+    private ?bool $contactUser = true;
+
     // ag: user could be primary, admin accountant, employee
     #[ORM\Column(name: 'user_type', type: 'string', length: 64, nullable: true)]
-    private ?string $userType = null;
+    private ?string $userType = 'employee';
 
     #[Gedmo\Timestampable(on: 'create')]
     #[ORM\Column(name: 'created_date', type: 'datetime', options: ['default' => "CURRENT_TIMESTAMP"])]
@@ -70,14 +73,14 @@ class FirmUserProfiles
         return $this->firstName;
     }
 
-    public function setFirstName(string $firstName): static
+    public function setFirstName(?string $firstName): static
     {
         $this->firstName = $firstName;
 
         return $this;
     }
 
-    public function getLastname(): ?string
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }
@@ -134,13 +137,26 @@ class FirmUserProfiles
         return $this;
     }
 
+    public function getContactUser(): ?bool
+    {
+        return $this->contactUser;
+    }
+
+    public function setContactUser(bool $contactUser): static
+    {
+        $this->contactUser;
+
+        return $this;
+    }
+
     public function getUserType(): ?string
     {
         return $this->userType;
     }
-    public function setUserType(string $userType): static
+
+    public function setUserType(?string $userType): static
     {
-        $this->userType;
+        $this->userType = $userType;
 
         return $this;
     }

@@ -1,4 +1,27 @@
 // ag: file for all the JS logic for admin view
+function validateFirmFormFields(selector, firmAccountUrl) {
+    let isValid = true;
+
+    $(selector).each(function (e) {
+        const value = $(this).val().trim();
+
+        // Custom validation for firm account URL
+        if ($(this).attr('name') === 'accountName' && !/^[a-z0-9]+$/.test(firmAccountUrl)) {
+            $(this).addClass('is-invalid');
+            isValid = false;
+            alert('Firm Account URL must be a single word, lowercase letters and numbers only – no spaces or special characters.');
+        }
+        // Generic required field validation
+        else if (value === '' && $(this).prop('required')) {
+            isValid = false;
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
+        }
+    });
+
+    return isValid;
+}
 jQuery(function ($) {
     // ag: logic for the add new firm/firmuser modal on dashboard page
     $('.admin-add-primary-user').on('click', function (e) {
@@ -35,7 +58,7 @@ jQuery(function ($) {
         }
     });
 
-    //   ag: logic for the back button on add new firm modal
+    // ag: logic for the back button on add new firm modal
     $('#admin-new-firm-return-to-form1').on('click', function (e) {
         $('#form-part-1').removeClass('d-none');
         $('#form-part-2').addClass('d-none');
@@ -47,7 +70,7 @@ jQuery(function ($) {
         $('#admin-add-primary-user').removeClass('d-none');
     });
 
-    //   agL logic to handle submit of a new firm modal
+    // ag: logic to handle submit of a new firm modal
     $('#admin-new-firm-submit').on('click', function (e) {
         let isValidForm2 = true;
         $('#form-part-2 input').each(function (e) {
@@ -114,7 +137,6 @@ jQuery(function ($) {
                 contentType: false,
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 success(data) {
-                    console.log(data);
                     if (data.success) {
                         $('#adminAddFirmModal').modal('hide');
                         // ag: window.notyf set globally in root app.js file
@@ -134,5 +156,76 @@ jQuery(function ($) {
         }
     });
 
-    // ag: end of jQuery
-});
+    // ag: logic for the update btn from the firm_view for the firm data
+    $('#admin-view-firm-update').on('click', function (e) {
+        const firmAccountUrl = $('#accountName').val();
+        // ag: add firmAccountUrl as second param so it can validate the input with regex
+        tokenFirm = $('#admin-update-firm-token').val();
+        firmId = $('#admin-update-firm-id').val();
+
+        formValid = validateFirmFormFields('#admin-view-firm-form input, #admin-view-firm-form select', firmAccountUrl);
+
+        const firmForm = document.querySelector('#admin-view-firm-form');
+
+        const formData = new FormData();
+
+        // Append firm form values
+        [...new FormData(firmForm).entries()].forEach(([key, value]) => {
+            formData.append(`firm[${key}]`, value);
+        });
+
+        formData.append('firm[_token]', tokenFirm);
+        formData.append('firmId', firmId);
+
+        if (formValid) {
+            $.ajax({
+                url: '/admin/ajax/update-firm-data',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success(data) {
+                    if (data.success) {
+                        // ag: window.notyf set globally in root app.js file
+                        window.notyf.success(data.message);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 3000);
+                    } else {
+                        // ag: if update failed don't refresh the page. no need.
+                        window.notyf.error(data.message);
+                    }
+                },
+            });
+        }
+    });
+
+    // ag: dynamic firm active/deactive logic
+    const adminFirmActiveToggleModal = document.getElementById('adminToggleFirmStatusModal');
+
+    if (adminFirmActiveToggleModal) {
+        adminFirmActiveToggleModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; // Button that triggered the modal
+            const title = button.getAttribute('data-modal-title'); // Extract info from data-* attributes
+
+            const modalTitle = adminFirmActiveToggleModal.querySelector('.modal-title');
+            modalTitle.textContent = title || 'Default Title';
+        });
+    }
+
+    // *************************************************** DATATABLE LOGIC ***************************************************** //
+    $('#adminDashboardViewTable').DataTable({
+        pageLength: 10,
+        order: [[0, 'asc']], // default sort first column
+    });
+
+    $('#adminFirmViewTable').DataTable({
+        rowCallback: function (row, data) {
+            // assuming "User Type" is column index 5 (0-based index, adjust as needed)
+            if (data[5] === 'primary') {
+                $(row).addClass('table-success primary-row');
+            }
+        },
+    });
+}); // ag: end of jQuery

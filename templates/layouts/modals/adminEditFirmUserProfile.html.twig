@@ -1,0 +1,94 @@
+{# <div class="modal fade" id="adminEditFirmUserModal" tabindex="-1" aria-labelledby="adminEditFirmUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered"> #}
+    <div class="modal-content">
+      <div method="post" action="">
+        <div class="modal-header bg-secondary text-white">
+          <h5 class="modal-title" id="adminAddFirmModalLabel">Edit Firm User</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form class="form-part" id="form-part-2">
+              <div class="container">
+                <div class="row">
+                  <div class="mb-3 col-4">
+                    <label for="firstName" class="form-label">First Name</label>
+                    <input type="text" class="form-control" name="firstName" id="firstName" value="{{ firmUserProfile.getFirstName() }}" required>
+                  </div>
+
+                  <div class="mb-3 col-4">
+                    <label for="lastName" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" name="lastName" id="lastName" value="{{ firmUserProfile.getLastName() }}" required>
+                  </div>
+                  
+                  <div class="mb-3 col-4">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" name="email" id="email" value="{{ firmUserProfile.getUser().getEmail() }}" required>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="container">
+                <div class="row">
+                  <div class="mb-3 col-6">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" name="title" id="title" value="{{ firmUserProfile.getTitle() }}">
+                  </div>
+
+                  <div class="mb-3 col-6">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" name="phone" id="phone" value="{{ firmUserProfile.getPhone() }}" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="container">
+                <div class="row">
+                  <div class="mb-3 col-6">
+                    <label for="userType" class="form-label">User Type</label>
+                    <select class="form-select" name="storagePlan" aria-label="Default select example">
+                    {% for type in firm_user_types %}
+                      <option value="{{ type }}" {% if firmUserProfile.getUserType() == type %}selected{% endif %} >{{ type }}</option>
+                    {% endfor %}
+                  </select>
+
+                  </div>
+
+
+                  <div class="mb-3 col-6">
+                    <label for="userType" class="form-label">Settings</label>
+                    <div class="form-check">
+                      <input class="form-check-input" name="bulkAction" type="checkbox" value="1" id="bulkAction" checked disabled>
+                      <input type="hidden" name="bulkAction" value="1">
+                      <label class="form-check-label" for="bulkAction">
+                        Enable Bulk Action
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" name="seeAllFiles" type="checkbox" value="1" id="seeAllFiles" checked disabled>
+                      <input type="hidden" name="seeAllFiles" value="1">
+                      <label class="form-check-label" for="seeAllFiles">
+                        Enable See All Files
+                      </label>
+                    </div>
+                    {# ag: hidden input for the role #}
+                    <input type="hidden" id="roles" name="roles" value="ROLE_FIRM">
+                  </div>
+                </div>
+              </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <a type="submit" href="{{ path('admin_firm_user_modal_submit') }}" class="btn btn-primary" id="admin-new-firm-submit">Submit</a>
+          <input type="hidden" id="admin-new-user-token" name="user[_token]" value="{{ csrf_token('user') }}">
+          <input type="hidden" id="admin-new-firm-user-profile-token" name="firm_user_profile[_token]" value="{{ csrf_token('firm_user_profile') }}">
+        </div>
+
+
+      </div>
+    </div>
+  {# </div>
+</div> #}

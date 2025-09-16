@@ -41,7 +41,7 @@ class FirmType extends AbstractType
             ])
             ->add('active', CheckboxType::class, [
                 'required' => false,
-                'empty_data' => 'true',
+                // 'empty_data' => 'true',
             ])
             ->add('account')
             ->add('qbbRemovalNum', IntegerType::class, [
