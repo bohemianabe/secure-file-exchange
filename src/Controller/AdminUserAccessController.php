@@ -17,8 +17,12 @@ use App\Form\FirmType;
 use App\Form\FirmUserProfileType;
 use App\Form\UserType;
 use Doctrine\ORM\EntityManager;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[IsGranted("ROLE_ADMIN")]
@@ -52,40 +56,83 @@ class AdminUserAccessController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/firm_user/{firmUserProfileId}/modal', name: "admin_firm_user_modal", methods: ['GET', 'POST'])]
-    #[Route('/admin/firm_user/modal/submit', name: "admin_firm_user_modal_submit")]
-    public function adminFirmUserProfileModal(Request $request, $firmUserProfileId, EntityManagerInterface $em): Response
+    #[Route('/admin/firm_user/new/{firmId}/modal', name: 'admin_new_firm_user_modal')]
+    public function adminNewFirmUserProfileModal(Request $request, $firmId)
     {
-        // $firmUserProfileId = $request->request->get('firmUserProfileId');
+        $firm = $this->em->getRepository(Firms::class)->find($firmId);
+        if ($request->get('_route') == 'admin_new_firm_user_modal') {
+            return $this->render('layouts/modals/adminAddNewFirmUserProfile.html.twig', [
+                'firm' => $firm,
+            ]);
+        }
+    }
 
-        $firmUserProfile = $em->getRepository(FirmUserProfiles::class)->find($firmUserProfileId);
+    #[Route('/admin/firm_user/{firmUserProfileId}/modal', name: "admin_firm_user_modal", methods: ['GET', 'POST'])]
+    #[Route('/admin/firm_user/modal/{firmUserProfileId}/submit', name: "admin_firm_user_modal_submit")]
+    public function adminEditFirmUserProfileModal(Request $request, $firmUserProfileId): Response
+    {
+        $firmUserProfile = $this->em->getRepository(FirmUserProfiles::class)->find($firmUserProfileId);
+        $user = $firmUserProfile->getUser();
+        if ($request->get('_route') == 'admin_firm_user_modal') {
 
-        return $this->render('layouts/modals/adminEditFirmUserProfile.html.twig', [
-            'firmUserProfile' => $firmUserProfile,
-        ]);
+            return $this->render('layouts/modals/adminEditFirmUserProfile.html.twig', [
+                'firmUserProfile' => $firmUserProfile,
+            ]);
+        } else {
+            $now = new \DateTime();
+
+
+            if ($user->getEmail() !== $request->request->all('user')['email']) {
+                // ag: update email address
+                $user->setEmail($request->request->all('user')['email']);
+                $user->setUpdatedDate($now);
+
+                $this->em->persist($user);
+                $this->em->flush($user);
+            }
+
+            $firmForm = $this->createForm(FirmUserProfileType::class, $firmUserProfile);
+            $firmForm->handleRequest($request);
+
+            if ($firmForm->isSubmitted() && $firmForm->isValid()) {
+                // ag: manually set updatedDate. 
+                $firmUserProfile->setUpdatedDate($now);
+                $this->em->persist($firmUserProfile);
+                $this->em->flush($firmUserProfile);
+
+                $this->addFlash('success', 'Firm User Updated.');
+                return $this->redirect($request->headers->get('referer'));
+                // return new JsonResponse(['success' => true, 'message' => 'went through']);
+            } else {
+                $this->addFlash('error', 'Form invalid. Contact an administrator.');
+                return $this->redirect($request->headers->get('referer'));
+            }
+        }
     }
 
     #[Route('/admin/deactivate_firm/{firm}', name: 'admin_toggle_firm_status')]
-    public function togglerFirmStatus(Request $request, ?Firms $firm, EntityManagerInterface $em)
+    public function adminTogglerFirmStatus(Request $request, ?Firms $firm)
     {
+        $now = new \DateTime();
         if ($firm->getActive()) {
             $firm->setActive(false);
         } else {
             $firm->setActive(true);
         }
-
-        $flushFirm = $em->flush($firm);
+        $firm->setUpdatedDate($now);
+        $this->em->flush($firm);
 
         return $this->redirect($request->headers->get('referer'));
     }
 
     // ag: ********************************************** ajax calls below here **********************************
     #[Route('/admin/ajax/new-firm-submit', name: 'admin_new_firm_submit', methods: ['GET', 'POST'])]
-    public function adminNewFormSubmit(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
+    public function adminNewFormSubmit(Request $request, SluggerInterface $slugger): Response
     {
 
         // ag: empty error array to collect errors while processing new firm and users
         $errors = array();
+        $now = new \DateTime();
         // ag: process the new firm
         $newFirm = new Firms();
 
@@ -107,7 +154,6 @@ class AdminUserAccessController extends AbstractController
                         $this->getParameter('firm_logo_public_path'),
                         $newFilename
                     );
-                    dd($logoFile);
                 } catch (FileException $e) {
                     dd($e->getMessage());
                     // Handle exception / log
@@ -120,19 +166,27 @@ class AdminUserAccessController extends AbstractController
                 $newFirm->setLogo($newFilename);
             }
 
-            $em->persist($newFirm);
-            $em->flush($newFirm);
+            $newFirm->setCreatedDate($now);
+            $newFirm->setUpdatedDate($now);
+            $this->em->persist($newFirm);
+            $this->em->flush($newFirm);
+
 
             // ag: if firm was created then go on to add the firmUserProfile
             if ($newFirm) {
                 // ag: created the new user
+
+                // dd($request->request);
                 $newUser = new User();
                 $newUserForm = $this->createForm(UserType::class, $newUser);
                 $newUserForm->handleRequest($request);
 
                 if ($newUserForm->isSubmitted() && $newUserForm->isValid()) {
-                    $em->persist($newUser);
-                    $em->flush($newUser);
+                    $newUser->setCreatedDate($now);
+                    $newUser->setUpdatedDate($now);
+
+                    $this->em->persist($newUser);
+                    $this->em->flush($newUser);
                 } else {
                     $errors[] = [
                         'error_type' => 'New User Form Error',
@@ -149,17 +203,21 @@ class AdminUserAccessController extends AbstractController
                     $firmUserProfileForm = $this->createForm(FirmUserProfileType::class, $newFirmUserProfile);
                     $firmUserProfileForm->handleRequest($request);
 
-                    // dd($firmUserProfileForm->getErrors(true, true));
+                    // dd(iterator_to_array($firmUserProfileForm->getErrors(true, true)));
 
                     if ($firmUserProfileForm->isSubmitted() && $firmUserProfileForm->isValid()) {
-                        $em->persist($newFirmUserProfile);
-                        $em->flush($newFirmUserProfile);
+                        $newFirmUserProfile->setCreatedDate($now);
+                        $newFirmUserProfile->setUpdatedDate($now);
+
+                        $this->em->persist($newFirmUserProfile);
+                        $this->em->flush($newFirmUserProfile);
                     } else {
                         $errors[] = [
                             'error_type' => 'New Firm User Profile Form Error',
                             'error_message' => iterator_to_array($firmUserProfileForm->getErrors(true, true)),
                         ];
                     }
+                    // dd($firmUserProfileForm);
                 }
             }
         } else {
@@ -185,7 +243,7 @@ class AdminUserAccessController extends AbstractController
     }
 
     #[Route('/admin/ajax/update-firm-data', name: 'admin_ajax_update_firm_data')]
-    public function updateFirmData(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
+    public function adminUpdateFirmData(Request $request, SluggerInterface $slugger): Response
     {
         // dd($request->request);
         $errors = array();
@@ -193,7 +251,7 @@ class AdminUserAccessController extends AbstractController
         $firmId = $request->request->get('firmId') ?? null;
 
         if ($firmId) {
-            $updatedFirm = $em->getRepository(Firms::class)->find($firmId);
+            $updatedFirm = $this->em->getRepository(Firms::class)->find($firmId);
         }
 
         $firmForm = $this->createForm(FirmType::class, $updatedFirm);
@@ -234,8 +292,8 @@ class AdminUserAccessController extends AbstractController
             }
 
             // ag: I don't need persist as the firm entity already exist, flush is enough
-            // $em->persist($updatedFirm);
-            $em->flush($updatedFirm);
+            // $this->em->persist($updatedFirm);
+            $this->em->flush($updatedFirm);
         } else {
             $formError = array_map(
                 fn($error) => [
@@ -263,5 +321,34 @@ class AdminUserAccessController extends AbstractController
         }
 
         return new JsonResponse($data);
+    }
+
+    #[Route('/admin/ajax/reset-firm-user-password', name: 'admin_ajax_reset_firm_user_password', methods: ['GET', 'POST'])]
+    public function adminResetFirmUserPassword(Request $request, MailerInterface $mailer)
+    {
+        $firmUserProfile = $this->em->getRepository(FirmUserProfiles::class)->find($request->request->get('firmUserProfileId'));
+        $email2 = (new TemplatedEmail())
+            ->from($this->params->get('from_email'))
+            ->to($firmUserProfile->getUser()->getEmail())
+            ->subject($this->params->get('app_name') . '*****' . 'RESET EMAIL REQUEST' . '*****')
+            ->htmlTemplate('emails/resetPassword.html.twig')
+            ->textTemplate('emails/resetPassword.txt.twig')
+            ->context([
+                'user' => $firmUserProfile,
+                // 'resetUrl' => $this->generateUrl('app_reset_password', [
+                //     'token' => '123',
+                // ], UrlGeneratorInterface::ABSOLUTE_URL),
+                'tokenLifetime' => '1 hour',
+            ]);
+        // $email = (new Email())
+        //     ->from('no-reply@example.com')
+        //     ->to($_ENV['FROM_EMAIL'])
+        //     ->subject('Test email')
+        //     ->text('Hello! This is a test email from Symfony.')
+        //     ->html('<p>Hello! This is a <b>test</b> email from Symfony.</p>');
+
+        $mailer->send($email2);
+        dd($this->params->get('from_email'));
+        dd($firmUserProfile);
     }
 }

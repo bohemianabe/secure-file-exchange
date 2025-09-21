@@ -160,7 +160,7 @@
 
             <div class="container d-flex justify-content-end">
                 <div class="row col-2">
-                    <button col="" type="submit" class="btn btn-primary" id="admin-view-firm-update" {% if not firm.getActive() %}disabled{% endif %}>Update</button>
+                    <button type="submit" class="btn btn-primary" id="admin-view-firm-update" {% if not firm.getActive() %}disabled{% endif %}>Update</button>
                     <input type="hidden" id="admin-update-firm-token" name="firm[_token]" value="{{ csrf_token('firm') }}">
                     <input type="hidden" id="admin-update-firm-id" name="firmId" value="{{ firm.getId() }}">
                 </div>
@@ -171,9 +171,14 @@
 
     <div class="container card py-4 {% if not firm.getActive() %}border-danger bg-light{% endif %}">
 
-        <div class="d-flex align-items-center gap-2 mb-3">
-            <i class="fas fa-user fa-lg text-secondary me-2" style="font-size:2rem;"></i>
-            <h2 class="mb-0">Firm Users</h2>
+        <div class="row d-flex justify-space-between">
+            <div class="col-6 d-flex align-items-center gap-2 mb-3">
+                <i class="fas fa-user fa-lg text-secondary me-2" style="font-size:2rem;"></i>
+                <h2 class="mb-0">Firm Users</h2>
+            </div>
+            <div class="col-6 d-flex align-items-center justify-content-end gap-2 mb-3">
+                <a class="btn btn-primary text-white" href="{{ path('admin_new_firm_user_modal', { firmId: firm.getId() }) }}" data-bs-toggle="modal" data-modal-title="Edit Firm User Profile" data-bs-target="adminEditFirmUserModal" data-dynamic-load="true" {% if not firm.getActive() %}style="pointer-events:none;"{% endif %}>Add User</a>
+            </div>
         </div>
 
 
@@ -211,6 +216,16 @@
         </div>
     </div>
 
+    {# to throw notyf message after getting a controller call #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                notyf.{{ label }}('{{ message|e('js') }}');
+            });
+            </script>
+        {% endfor %}
+    {% endfor %}
 
     {# ag: iterate modals needed, passed from the controller #}
     {% for modal in modals_to_include %}

@@ -103,6 +103,7 @@
                   <input type="file" class="form-control" name="logo" id="logo">
                 </div>
               </div>
+              <input type="hidden" id="active" name="active" value="1">
             </div>
 
           </form>
@@ -153,22 +154,20 @@
 
                   <div class="mb-3 col-6">
                     <label for="userType" class="form-label">Settings</label>
-                    <div class="form-check">
+                    <div class="form-check form-switch">
                       <input class="form-check-input" name="bulkAction" type="checkbox" value="1" id="bulkAction" checked disabled>
                       <input type="hidden" name="bulkAction" value="1">
                       <label class="form-check-label" for="bulkAction">
                         Enable Bulk Action
                       </label>
                     </div>
-                    <div class="form-check">
+                    <div class="form-check form-switch">
                       <input class="form-check-input" name="seeAllFiles" type="checkbox" value="1" id="seeAllFiles" checked disabled>
                       <input type="hidden" name="seeAllFiles" value="1">
                       <label class="form-check-label" for="seeAllFiles">
                         Enable See All Files
                       </label>
                     </div>
-                    {# ag: hidden input for the role #}
-                    <input type="hidden" id="roles" name="roles" value="ROLE_FIRM">
                   </div>
                 </div>
               </div>
@@ -183,6 +182,8 @@
           <input type="hidden" id="admin-new-firm-token" name="firm[_token]" value="{{ csrf_token('firm') }}">
           <input type="hidden" id="admin-new-user-token" name="user[_token]" value="{{ csrf_token('user') }}">
           <input type="hidden" id="admin-new-firm-user-profile-token" name="firm_user_profile[_token]" value="{{ csrf_token('firm_user_profile') }}">
+          {# ag: hidden input for the role #}
+          <input type="hidden" id="roles" name="roles" value="ROLE_FIRM">
         </div>
       </div>
     </div>

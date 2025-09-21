@@ -1,0 +1,102 @@
+{# <div class="modal fade" id="adminEditFirmUserModal" tabindex="-1" aria-labelledby="adminEditFirmUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered"> #}
+    <div class="modal-content">
+      <div>
+        <div class="modal-header bg-secondary text-white">
+          <h5 class="modal-title" id="adminAddFirmModalLabel">Edit Firm User</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form class="" method="post" id="admin-firm-user-submit" action="">
+              <div class="container">
+                <div class="row">
+                  <div class="mb-3 col-4">
+                    <label for="firstName" class="form-label">First Name</label>
+                    <input type="text" class="form-control" name="firm_user_profile[firstName]" id="firstName" value="" required>
+                  </div>
+
+                  <div class="mb-3 col-4">
+                    <label for="lastName" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" name="firm_user_profile[lastName]" id="lastName" value="" required>
+                  </div>
+                  
+                  <div class="mb-3 col-4">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" name="user[email]" id="email" value="" required>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="container">
+                <div class="row">
+                  <div class="mb-3 col-6">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" name="firm_user_profile[title]" id="title" value="">
+                  </div>
+
+                  <div class="mb-3 col-6">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" name="firm_user_profile[phone]" id="phone" value="" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="container">
+                <div class="row">
+                  <div class="mb-3 col-6">
+                        <label for="userType" class="form-label">User Type</label>
+                        {# ag: set hasPrimary variable to skip over the select fields if it exist #}
+                        {% if firm.hasPrimaryUser() is true %}{% set hasPrimary = true %}{% endif %}
+                        <select class="form-select" name="firm_user_profile[userType]" aria-label="Default select example">
+                            {% for type in firm_user_types %}
+                                {% if hasPrimary is true and type != 'primary' %}
+                                    <option value="{{ type }}">{{ type }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+
+                  <div class="mb-3 col-6">
+                    <label for="userType" class="form-label">Settings</label>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" name="firm_user_profile[bulkAction]" type="checkbox" value="" id="bulkAction">
+                      <label class="form-check-label" for="bulkAction">
+                        Enable Bulk Action
+                      </label>
+                    </div>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" name="firm_user_profile[seeAllFiles]" type="checkbox" value="" id="seeAllFiles">
+                      <label class="form-check-label" for="seeAllFiles">
+                        Enable See All Files
+                      </label>
+                    </div>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" name="firm_user_profile[contactUser]" type="checkbox" value="" id="contactUser">
+                      <label class="form-check-label" for="contactUser">
+                        Make this user a contact?
+                      </label>
+                      <span data-bs-toggle="tooltip" data-bs-placement="top" title="Contacts show up on the list of people your clients can send files to.">
+                      <small><i class="fas fa-question-circle"></i></small> 
+                      </span>
+                      </br>
+                    </div>
+                    {# ag: hidden input for the role #}
+                    <input type="hidden" id="roles" name="user[roles][]" value="ROLE_FIRM">
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" id="admin-firm-user-profile-token" name="firm_user_profile[_token]" value="{{ csrf_token('firm_user_profile') }}">
+              <input type="hidden" id="admin-user-profile-token" name="user[_token]" value="{{ csrf_token('user') }}">
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" form="admin-firm-user-submit" class="btn btn-primary" id="admin-firm-user-submit">Submit</button>
+        </div>
+      </div>
+    </div>
+  {# </div>
+</div> #}

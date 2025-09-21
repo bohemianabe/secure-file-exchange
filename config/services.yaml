@@ -7,6 +7,8 @@ parameters:
     # ag: admin_user_types set in the env file
     firm.user_types: '%env(csv:FIRM_USER_TYPES)%'
     firm_logo_public_path: '%env(FIRM_LOGO_DIR)%'
+    from_email: '%env(FROM_EMAIL)%'
+    app_name: '%env(APP_NAME)%'
 
 services:
     # default configuration for services in *this* file

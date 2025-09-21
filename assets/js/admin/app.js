@@ -22,6 +22,41 @@ function validateFirmFormFields(selector, firmAccountUrl) {
 
     return isValid;
 }
+
+// ag: since button is in a modal that isn't visible must pass function to the DOM
+$(document).on('click', '#admin-reset-firm-user-password', function (e) {
+    const firmUserProfileId = e.currentTarget.getAttribute('data-firm-user-id');
+    // e.preventDefault();
+
+    // const button = e.relatedTarget; // Button that triggered the modal
+    // const title = button.getAttribute('data-firm-user-id'); // Extract info from data-* attributes
+
+    console.log();
+
+    $.ajax({
+        url: '/admin/ajax/reset-firm-user-password',
+        method: 'POST',
+        data: {
+            firmUserProfileId: firmUserProfileId,
+        },
+        // processData: false,
+        // contentType: false,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        success(data) {
+            if (data.success) {
+                // ag: window.notyf set globally in root app.js file
+                window.notyf.success(data.message);
+                setTimeout(function () {
+                    window.location.reload();
+                }, 3000);
+            } else {
+                // ag: if update failed don't refresh the page. no need.
+                window.notyf.error(data.message);
+            }
+        },
+    });
+});
+
 jQuery(function ($) {
     // ag: logic for the add new firm/firmuser modal on dashboard page
     $('.admin-add-primary-user').on('click', function (e) {

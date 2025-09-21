@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 // ag: A helper Class only meant for use in controllers to encapsulate logic related to entity fetching and response rendering. Handling errors by returning a view to the user (e.g., “record not found,” “database error”). 
@@ -16,11 +17,13 @@ trait EntityActions
 {
     private \Exception $lastException;
     private $em;
+    private $params;
 
-    public function __construct(EntityManagerInterface $em, #[Autowire('%firm.user_types%')] private array $firmUserTypes)
+    public function __construct(EntityManagerInterface $em, #[Autowire('%firm.user_types%')] private array $firmUserTypes, ParameterBagInterface $params)
     {
         $this->em = $em;
         $this->firmUserTypes = $firmUserTypes;
+        $this->params = $params;
     }
 
     /**

@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{{ asset('styles/site-wide-styling.css') }}">
     <link rel="stylesheet" href="{{ asset('styles/theme.css') }}">
     {# <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"> #}
-    <title>{% block title %}{{ site_name }}{% endblock %}</title>
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
 
   {% block styles %}{% endblock %}
   {% block stylesheets %}
@@ -27,8 +27,8 @@
       <div class="d-flex align-items-center">
         <a class="me-2" href="{{ path('admin_dashboard') }}"><img src="{{ asset('images/secure-file-color.png') }}" style="height:3rem;" /></a> 
         <span class="vr mx-2"></span>
-        <span class="fw-semibold fs-5 text-secondary">{{ site_name }}</span>
-        {# <h5 class="offcanvas-title text-center" id="offcanvasNavbarLabel">{{ site_name }}</h5> #}
+        <span class="fw-semibold fs-5 text-secondary">{{ app_name }}</span>
+        {# <h5 class="offcanvas-title text-center" id="offcanvasNavbarLabel">{{ app_name }}</h5> #}
       </div>
     </div>
 
@@ -37,7 +37,7 @@
     </button>
       <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
         <div class="offcanvas-header">
-          <h5 class="offcanvas-title text-secondary" id="offcanvasNavbarLabel">{{ site_name }}</h5>
+          <h5 class="offcanvas-title text-secondary" id="offcanvasNavbarLabel">{{ app_name }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body d-lg-flex align-items-lg-center flex-wrap justify-content-lg-end"> 

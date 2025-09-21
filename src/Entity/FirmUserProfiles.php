@@ -7,9 +7,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\Common\Collections\Collection;
 
+// ag: using HasLifecycleCallBack to work in tandem with the updateDate auto feature function onPreUpdate()
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: FirmUserProfilesRepository::class)]
 class FirmUserProfiles
 {
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id_firm_user_profile', nullable: false, type: 'integer')]
@@ -63,6 +66,12 @@ class FirmUserProfiles
     private User $user;
 
 
+    public function isPrimary(): bool
+    {
+        return $this->userType == 'primary';
+    }
+
+    // ****************************** ag: setters and getters **********************************************
     public function getId(): ?int
     {
         return $this->idFirmUserProfile;
@@ -179,6 +188,13 @@ class FirmUserProfiles
     {
         $this->updatedDate = $updatedDate;
         return $this;
+    }
+
+    // ag: ORM feature so it'll update the updatedDate only when it detects a change.
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedDate = new \DateTime();
     }
 
     public function getUser(): ?User

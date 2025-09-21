@@ -22,17 +22,18 @@ class FirmUserProfileType extends AbstractType
             ->add('phone')
             ->add('bulkAction')
             ->add('seeAllFiles')
+            ->add('contactUser')
             ->add('userType')
-            ->add('createdDate', DateTimeType::class, [
-                'required' => false,
-                'widget' => 'single_text',
-                'empty_data' => (new \DateTime())->format('Y-m-d H:i:s'), // must be string
-            ])
-            ->add('updatedDate', DateTimeType::class, [
-                'required' => false,
-                'widget' => 'single_text',
-                'empty_data' => (new \DateTime())->format('Y-m-d H:i:s'), // must be string
-            ])
+            // ->add('createdDate', DateTimeType::class, [
+            //     'required' => false,
+            //     'widget' => 'single_text',
+            //     'empty_data' => (new \DateTime())->format('Y-m-d H:i:s'), // must be string
+            // ])
+            // ->add('updatedDate', DateTimeType::class, [
+            //     'required' => false,
+            //     'widget' => 'single_text',
+            //     'empty_data' => (new \DateTime())->format('Y-m-d H:i:s'), // must be string
+            // ])
             // ->add('firm', EntityType::class, [
             //     'class' => Firms::class,
             //     'choice_label' => 'id',

@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class UserType extends AbstractType
 {
@@ -33,24 +34,28 @@ class UserType extends AbstractType
                 'multiple' => true,
                 'expanded' => false,
                 'label' => 'User Roles',
-                'required' => true,
+                'required' => false,
 
             ])
-            ->add('password')
+            ->add('password', PasswordType::class, [
+                'required' => false,
+                'label' => 'Password',
+                'mapped' => false,
+            ])
             ->add('isActive', CheckboxType::class, [
                 'required' => false,
                 'empty_data' => 'true',
             ])
-            ->add('createdDate', DateTimeType::class, [
-                'required' => false,
-                'widget' => 'single_text',
-                'empty_data' => (new \DateTime())->format('Y-m-d H:i:s'), // must be string
-            ])
-            ->add('updatedDate', DateTimeType::class, [
-                'required' => false,
-                'widget' => 'single_text',
-                'empty_data' => (new \DateTime())->format('Y-m-d H:i:s'), // must be string
-            ])
+            // ->add('createdDate', DateTimeType::class, [
+            //     'required' => false,
+            //     'widget' => 'single_text',
+            //     'empty_data' => (new \DateTime())->format('Y-m-d H:i:s'), // must be string
+            // ])
+            // ->add('updatedDate', DateTimeType::class, [
+            //     'required' => false,
+            //     'widget' => 'single_text',
+            //     'empty_data' => (new \DateTime())->format('Y-m-d H:i:s'), // must be string
+            // ])
         ;
     }
 
