@@ -24,6 +24,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 
 #[IsGranted("ROLE_ADMIN")]
 class AdminUserAccessController extends AbstractController
@@ -80,7 +81,6 @@ class AdminUserAccessController extends AbstractController
             ]);
         } else {
             $now = new \DateTime();
-
 
             if ($user->getEmail() !== $request->request->all('user')['email']) {
                 // ag: update email address
@@ -324,31 +324,40 @@ class AdminUserAccessController extends AbstractController
     }
 
     #[Route('/admin/ajax/reset-firm-user-password', name: 'admin_ajax_reset_firm_user_password', methods: ['GET', 'POST'])]
-    public function adminResetFirmUserPassword(Request $request, MailerInterface $mailer)
+    public function adminResetFirmUserPassword(Request $request, ResetPasswordHelperInterface $resetPasswordHelper, MailerInterface $mailer): Response
     {
         $firmUserProfile = $this->em->getRepository(FirmUserProfiles::class)->find($request->request->get('firmUserProfileId'));
-        $email2 = (new TemplatedEmail())
-            ->from($this->params->get('from_email'))
-            ->to($firmUserProfile->getUser()->getEmail())
-            ->subject($this->params->get('app_name') . '*****' . 'RESET EMAIL REQUEST' . '*****')
-            ->htmlTemplate('emails/resetPassword.html.twig')
-            ->textTemplate('emails/resetPassword.txt.twig')
-            ->context([
-                'user' => $firmUserProfile,
-                // 'resetUrl' => $this->generateUrl('app_reset_password', [
-                //     'token' => '123',
-                // ], UrlGeneratorInterface::ABSOLUTE_URL),
-                'tokenLifetime' => '1 hour',
-            ]);
-        // $email = (new Email())
-        //     ->from('no-reply@example.com')
-        //     ->to($_ENV['FROM_EMAIL'])
-        //     ->subject('Test email')
-        //     ->text('Hello! This is a test email from Symfony.')
-        //     ->html('<p>Hello! This is a <b>test</b> email from Symfony.</p>');
+        $user = $firmUserProfile->getUser();
 
-        $mailer->send($email2);
-        dd($this->params->get('from_email'));
-        dd($firmUserProfile);
+        try {
+            $resetToken = $resetPasswordHelper->generateResetToken($user);
+
+            // dd($this->generateUrl('app_reset_password', ['token' => $resetToken]));
+            $email = (new TemplatedEmail())
+                ->from($this->params->get('from_email'))
+                ->to($user->getEmail())
+                ->subject($this->params->get('app_name') . '*****' . 'RESET EMAIL REQUEST' . '*****')
+                ->htmlTemplate('emails/resetPassword.html.twig')
+                ->textTemplate('emails/resetPassword.txt.twig')
+                ->context([
+                    'user' => $user,
+                    'resetUrl' => $this->generateUrl('app_reset_password', [
+                        'token' => $resetToken->getToken(),
+                    ], UrlGeneratorInterface::ABSOLUTE_URL),
+                    'tokenLifetime' => '1 hour',
+                ]);
+
+            $mailer->send($email);
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => sprintf('Password reset email sent to %s', $user->getEmail()),
+            ]);
+        } catch (\Throwable $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Failed to send reset email: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

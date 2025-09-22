@@ -1,11 +1,56 @@
-{% extends 'base.html.twig' %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-{% block title %}Password Reset Email Sent{% endblock %}
+    {# ag: site flavicon #}
+    <link rel="icon" href="{{ asset('images/secure-file-color.svg') }}">
+    {# Bootstrap 5 via CDN ag: also list it before your custom css so it will override bootstrap #}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('styles/site-wide-styling.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/theme.css') }}">
+    {# base.html.twig #}
+
+
+    {% block styles %}{% endblock %}
+    <title>{% block title %}Password Reset Email Sent{% endblock %}</title>
+</head>
 
 {% block body %}
-    <p>
-        If an account matching your email exists, then an email was just sent that contains a link that you can use to reset your password.
-        This link will expire in {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
-    </p>
-    <p>If you don't receive an email please check your spam folder or <a href="{{ path('app_forgot_password_request') }}">try again</a>.</p>
+
+<body class="min-vh-100 d-flex flex-column bg-light" style="background-image: url('{{ asset('images/stack-of-files.jpg' )}}'); background-size:cover;position:relative;">
+    <div class="login-overlay" style="position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.4);"></div>
+
+        <main class="flex-grow-1 d-flex align-items-center justify-content-center py-5">
+            <div class="card shadow-lg" style="max-width:440px;width:100%;">
+                <div class="card-body p-4">
+                    <div class="text-center m-4">
+                        <img src="{{ asset('images/secure-file-color.png') }}" style="height:10rem;width:auto;" >
+                    </div>
+                    <h1 class="h4 mb-4 text-center" >Sent!</h1>
+
+                    <p>
+                        If an account matching your email exists, then an email was just sent that contains a link that you can use to reset your password.
+                        <strong><u>This link will expire in {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.</u></strong>
+                    </p>
+                    <p>If you don't receive an email please check your spam folder or <a href="{{ path('app_forgot_password_request') }}">try again</a>.</p>
+
+                    <div class="text-end mt-4">
+                        <a href="/">Home Page</a>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+        <footer class="text-center pb-4">
+            ©  {{ "now"|date("Y") }} <a href="https://www.abelwebdevelopment.com/" target="_blank" rel="nofollow noopener">Abel Web Development</a> — All Rights Reserved.<br>
+            Application Built By Abel Web Development
+        </footer>
+
+    </div>
+</body>
 {% endblock %}

@@ -21,6 +21,8 @@ security:
                 check_path: app_login
                 # ag: after running login logic at app_login default path set to handle dashboard route logic
                 default_target_path: app_post_login
+                # ag: something weird was happening with login so I added this.
+                always_use_default_target_path: true
                 enable_csrf: true
             logout:
                 path: app_logout
@@ -29,7 +31,8 @@ security:
             # ag: this enables the remember me checkbox on the login page
             remember_me:
                 secret: '%kernel.secret%'
-
+                lifetime: 86400 # 24 hours
+                path: /
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -39,10 +42,11 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/(login|logout|reset-password), roles: PUBLIC_ACCESS }
+        - { path: ^/(login|reset-password), roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/firm, roles: ROLE_FIRM }
         - { path: ^/client, roles: ROLE_CLIENT }
+        - { path: ^/post-login, roles: ROLE_USER }
         - { path: ^/.*, roles: ROLE_USER }
 when@test:
     security:

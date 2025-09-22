@@ -17,8 +17,14 @@ class LoginController extends AbstractController
     }
 
     #[Route(path: '/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    public function login(AuthenticationUtils $authenticationUtils, Security $security): Response
     {
+        // ag: check if user is already logged in
+        if ($security->getUser()) {
+            // Redirect to post-login role-aware route
+            return $this->redirectToRoute('app_post_login');
+        }
+
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
 
@@ -35,7 +41,7 @@ class LoginController extends AbstractController
     #[Route('/post-login', name: 'app_post_login')]
     public function postLogin(Security $security): Response
     {
-        // dd($security->getUser());
+
         if (!$security->getUser()) {
             return $this->redirectToRoute('app_login');
         }

@@ -39,11 +39,12 @@ const notyf = new Notyf({
 
 // ag: logic for global dynamic modals to open
 $(document).on('click', '[data-dynamic-load]', function (e) {
-    let this_component = $(this);
+    let this_component = $(e.currentTarget);
     let this_modal = $(this_component.data('bs-target'));
     let this_target = this_component.attr('href') ? this_component.attr('href') : '??';
+    let modal_title = this_component.attr('data-modal-title');
 
-    if (this_modal.find('.modal-title').length > 0) this_modal.find('.modal-title').html('');
+    if (this_modal.find('.modal-title').length == 0) $('.modal-title').text(modal_title);
 
     $.ajax({
         url: this_target,

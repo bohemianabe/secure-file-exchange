@@ -1,11 +1,11 @@
 {# <div class="modal fade" id="adminEditFirmUserModal" tabindex="-1" aria-labelledby="adminEditFirmUserModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered"> #}
-    <div class="modal-content">
+    {# <div class="modal-content">
       <div>
         <div class="modal-header bg-secondary text-white">
           <h5 class="modal-title" id="adminAddFirmModalLabel">Edit Firm User</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+        </div> #}
 
         <div class="modal-body">
           <form class="" method="post" id="admin-firm-user-submit" action="{{ path('admin_firm_user_modal_submit', { firmUserProfileId: firmUserProfile.getId() }) }}">
@@ -100,18 +100,7 @@
             <button type="submit" form="admin-firm-user-submit" class="btn btn-primary" id="admin-firm-user-submit">Submit</button>
           </div>
         </div>
-      </div>
-    </div>
-
-    {% block javascript %}
-      <script>
-
-          {# const adminResetFirmUserPassword = document.getElementById('admin-reset-firm-user-password');
-
-          adminResetFirmUserPassword.addEventListener('click', function (event) {
-            console.log('reset password down below');
-          }); #}
-      </script>
-    {% endblock %}
+      {# </div> #}
+    {# </div> #}
   {# </div>
 </div> #}

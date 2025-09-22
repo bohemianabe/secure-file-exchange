@@ -171,13 +171,17 @@
 
     <div class="container card py-4 {% if not firm.getActive() %}border-danger bg-light{% endif %}">
 
+        {% if not firm.getActive() %}
+            <fieldset disabled>
+        {% endif %}
+
         <div class="row d-flex justify-space-between">
             <div class="col-6 d-flex align-items-center gap-2 mb-3">
                 <i class="fas fa-user fa-lg text-secondary me-2" style="font-size:2rem;"></i>
                 <h2 class="mb-0">Firm Users</h2>
             </div>
             <div class="col-6 d-flex align-items-center justify-content-end gap-2 mb-3">
-                <a class="btn btn-primary text-white" href="{{ path('admin_new_firm_user_modal', { firmId: firm.getId() }) }}" data-bs-toggle="modal" data-modal-title="Edit Firm User Profile" data-bs-target="adminEditFirmUserModal" data-dynamic-load="true" {% if not firm.getActive() %}style="pointer-events:none;"{% endif %}>Add User</a>
+                <a class="btn btn-primary text-white" href="{{ path('admin_new_firm_user_modal', { firmId: firm.getId() }) }}" data-bs-toggle="modal" data-modal-title="Add Firm User Profile" data-bs-target="defaultTemplateModal" data-dynamic-load="true">Add User</a>
             </div>
         </div>
 
@@ -207,13 +211,18 @@
                         <td>{{ user.getUserType() }}</td>
                         <td>{% if user.getUser().getIsActive() is true %}Active{% else %}Inactive{% endif %}</td>
                         <td class="text-center">
-                            <a class="btn btn-warning text-white" href="{{ path('admin_firm_user_modal', { firmUserProfileId: user.getId() })}}" data-bs-toggle="modal" data-modal-title="Edit Firm User Profile" data-bs-target="adminEditFirmUserModal" data-dynamic-load="true" {% if not firm.getActive() %}style="pointer-events:none;"{% endif %}>Edit</a>
+                            <a class="btn btn-warning text-white" href="{{ path('admin_firm_user_modal', { firmUserProfileId: user.getId() })}}" data-bs-toggle="modal" data-modal-title="Edit Firm User Profile" data-bs-target="adminEditFirmUserModal" data-dynamic-load="true">Edit</a>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {# ag: disables all input fields if firm is inactive #}
+        {% if not firm.getActive() %}
+            </fieldset>
+        {% endif %}
+
     </div>
 
     {# to throw notyf message after getting a controller call #}
