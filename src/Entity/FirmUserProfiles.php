@@ -31,13 +31,13 @@ class FirmUserProfiles
     private ?string $phone = null;
 
     #[ORM\Column(name: 'bulk_action', type: 'boolean', nullable: true, options: ['default' => true])]
-    private ?bool $bulkAction = true;
+    private ?bool $bulkAction = null;
 
     #[ORM\Column(name: 'see_all_files', type: 'boolean', nullable: true, options: ['default' => true])]
-    private ?bool $seeAllFiles = true;
+    private ?bool $seeAllFiles = null;
 
     #[ORM\Column(name: 'contact_user', type: 'boolean', nullable: true)]
-    private ?bool $contactUser = true;
+    private ?bool $contactUser = null;
 
     // ag: user could be primary, admin accountant, employee
     #[ORM\Column(name: 'user_type', type: 'string', length: 64, nullable: true)]
@@ -139,9 +139,9 @@ class FirmUserProfiles
         return $this->seeAllFiles;
     }
 
-    public function setSeeAllFiles(bool $seeAllFiles): static
+    public function setSeeAllFiles(int $seeAllFiles): static
     {
-        $this->seeAllFiles;
+        $this->seeAllFiles = $seeAllFiles;
 
         return $this;
     }
@@ -151,9 +151,9 @@ class FirmUserProfiles
         return $this->contactUser;
     }
 
-    public function setContactUser(bool $contactUser): static
+    public function setContactUser(int $contactUser): static
     {
-        $this->contactUser;
+        $this->contactUser = $contactUser;
 
         return $this;
     }

@@ -63,6 +63,11 @@ $(document).on('click', '[data-dynamic-load]', function (e) {
 // ag: attached notyf to the window object so I can access it globally.
 window.notyf = notyf;
 
+document.getElementById('clear-logo').addEventListener('click', function () {
+    const fileInput = document.getElementById('company-logo-input');
+    fileInput.value = ''; // reset the input
+});
+
 // notyf.open({
 //     type: 'warning',
 //     message: 'Send us <b>an email</b> to get support',

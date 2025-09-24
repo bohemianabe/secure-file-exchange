@@ -3,6 +3,7 @@
 namespace App\Controller\Traits;
 
 use App\Entity;
+use App\Entity\Firms;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -297,4 +298,50 @@ trait EntityActions
         return $records;
     } // end function _fetchWhereAllWithin
 
+    //     
+    // 
+    //   ag: helper functions for data metrics  
+    // 
+    protected function _getActiveFirmMetrics()
+    {
+        $allFirms = $this->_fetchAll(Firms::class);
+        $activeFirms = $this->_fetchWhere(Firms::class, ['active' => true]);
+
+        $total = count($allFirms);
+        $active = count($activeFirms);
+
+        if ($total === 0) {
+            return 0; // avoid division by zero
+        }
+
+        return round(($active / $total) * 100, 2);
+    }
+
+    protected function _getStoragePlanMetrics()
+    {
+        // Get total number of firms
+        $allFirms = $this->_fetchAll(Firms::class);
+        $total = count($allFirms);
+
+        if ($total === 0) {
+            return [];
+        }
+
+        // Count firms per storage plan
+        $plans = [];
+        foreach ($allFirms as $firm) {
+            $planName = $firm->getStoragePlan()->getName(); // adjust to your entity mapping
+            if (!isset($plans[$planName])) {
+                $plans[$planName] = 0;
+            }
+            $plans[$planName]++;
+        }
+
+        // Convert counts to percentages
+        foreach ($plans as $name => $count) {
+            $plans[$name] = round(($count / $total) * 100, 2);
+        }
+
+        return $plans;
+    }
 }

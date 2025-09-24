@@ -22,6 +22,13 @@
 </head>
 <body class="min-vh-100 d-flex flex-column bg-light" style="background-image: url('{{ asset('images/stack-of-files.jpg' )}}'); background-size:cover;position:relative;">
     <div class="login-overlay" style="position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.4);"></div>
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
 
     <main class="flex-grow-1 d-flex align-items-center justify-content-center py-5">
         <div class="card shadow-lg" style="max-width:440px;width:100%;">
@@ -49,14 +56,14 @@
 
                     <div class="mb-3 position-relative">
                         <label class="form-label" for="inputPassword">Password</label>
-                        <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
+                        <input type="password" name="_password" id="password" class="form-control mt-3" autocomplete="current-password" required>
                         <div class="mb-3 mt-3 text-end">
                             <a href="{{ path('app_forgot_password_request') }}">Forgot Password</a>
                         </div>
 
-                        {# <button type="button" id="togglePassword" class="btn btn-sm btn-outline-secondary position-absolute end-0 top-0 mt-2 me-2" tabindex="-1">
-                            <i class="fas fa-eye"></i>
-                        </button> #}
+                        <button type="button" id="togglePassword" class="btn btn-sm btn-outline-secondary position-absolute end-0 top-0 mt-0 mb-2 me-2" tabindex="-1">
+                            <i class="fas fa-building">Show</i>
+                        </button>
                     </div>
 
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
@@ -80,8 +87,24 @@
 
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  {% block javascripts %}{% endblock %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
+  {% block javascripts %}
+    {{ encore_entry_script_tags('app') }}
+
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function () {
+        const passwordInput = document.getElementById('password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                this.textContent = 'Hide';
+            } else {
+                passwordInput.type = 'password';
+                this.textContent = 'Show';
+            }
+        });
+    </script>
+  {% endblock %}
+{# {% block importmap %}{{ importmap('app') }}{% endblock %} #}
+
 </body>
 </html>
 

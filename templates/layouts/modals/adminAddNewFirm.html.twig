@@ -96,13 +96,31 @@
                 </div>
 
                 <div class="mb-3 col-6">
-                  <label for="logo" class="form-label">Company Logo - MAX SIZE 2M</label>
+
+                  <div class="d-flex flex-wrap align-items-center gap-2">
+                    <div class="col-12 d-flex justify-content-between">
+                      <div>
+                        <label for="logo" class="form-label">Company Logo - MAX SIZE 2M</label>
+                        <span data-bs-toggle="tooltip" data-bs-placement="top" title="Please upload a high res png/jpeg/svg file with a clear background. MAX SIZE 2M">
+                          <small><i class="fas fa-question-circle"></i></small> 
+                        </span>
+                      </div>
+                      <button type="button" id="clear-logo" class="btn btn-outline-secondary btn-sm">
+                        Clear
+                      </button>
+
+                    </div>
+                    <input type="file" id="company-logo-input" name="logo" class="form-control">
+                  </div>
+
+                  {# <label for="logo" class="form-label">Company Logo - MAX SIZE 2M</label>
                   <span data-bs-toggle="tooltip" data-bs-placement="top" title="Please upload a high res png/jpeg/svg file with a clear background. MAX SIZE 2M">
-                    <small><i class="fas fa-question-circle"></i></small> 
+                  <small><i class="fas fa-question-circle"></i></small> 
                   </span>
-                  <input type="file" class="form-control" name="logo" id="logo">
+                  <input type="file" class="form-control" name="logo" id="logo"> #}
                 </div>
               </div>
+              {# firm hidden values here #}
               <input type="hidden" id="active" name="active" value="1">
             </div>
 
@@ -168,10 +186,25 @@
                         Enable See All Files
                       </label>
                     </div>
+                    <div class="form-check form-switch">
+                      <input type="hidden" name="contactUser" value="0">
+                      <input class="form-check-input" name="contactUser" type="checkbox" value="1" id="contactUser" checked>
+                      <label class="form-check-label" for="contactUser">
+                        Make this user a contact?
+                      </label>
+                      <span data-bs-toggle="tooltip" data-bs-placement="top" title="Contacts show up on the list of people clients can send files to.">
+                      <small><i class="fas fa-question-circle"></i></small> 
+                      </span>
+                      </br>
+                    </div>
                   </div>
                 </div>
               </div>
+            {# ag: hidden input for the role #}
+            <input type="hidden" id="roles" name="roles" value="ROLE_FIRM">
           </form>
+          </br>
+          <small class="text-muted fst-italic">*<u>Welcome email with password link will be sent to user.</u></small>          
         </div>
 
         <div class="modal-footer">
@@ -182,8 +215,6 @@
           <input type="hidden" id="admin-new-firm-token" name="firm[_token]" value="{{ csrf_token('firm') }}">
           <input type="hidden" id="admin-new-user-token" name="user[_token]" value="{{ csrf_token('user') }}">
           <input type="hidden" id="admin-new-firm-user-profile-token" name="firm_user_profile[_token]" value="{{ csrf_token('firm_user_profile') }}">
-          {# ag: hidden input for the role #}
-          <input type="hidden" id="roles" name="roles" value="ROLE_FIRM">
         </div>
       </div>
     </div>

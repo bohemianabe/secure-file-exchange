@@ -23,6 +23,7 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\String\ByteString;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 
@@ -34,14 +35,18 @@ class AdminUserAccessController extends AbstractController
     #[Route('/admin/dashboard', name: 'admin_dashboard')]
     public function adminDashboard(Request $request): Response
     {
+        // ag: calculate data for the circle charts on page
+        // dd($this->_getStoragePlanMetrics());
+
         // dd($this->_fetchWhere(Firms::class, ['active' => true]));
         return $this->render('admin_user_access/dashboard.html.twig', [
-            'firms' => $this->_fetchWhere(Firms::class, ['active' => true]),
+            'firms' => $this->_fetchAll(Firms::class),
             'storage_plans' => $this->_fetchAll(StoragePlans::class),
             'states' => $this->_fetchAll(States::class),
             'firm_user_types' => $this->firmUserTypes,
             // ag: variable to pass in needed modals for the dashboard page.
             'modals_to_include' => ['adminAddNewFirm.html.twig'],
+            'chartData' => ['activeFirmMetrics' => $this->_getActiveFirmMetrics(), 'storagePlanMetrics' => $this->_getStoragePlanMetrics()],
         ]);
     }
 
@@ -125,11 +130,15 @@ class AdminUserAccessController extends AbstractController
         return $this->redirect($request->headers->get('referer'));
     }
 
+    //*
+    //
     // ag: ********************************************** ajax calls below here **********************************
+    //
+    //*
     #[Route('/admin/ajax/new-firm-submit', name: 'admin_new_firm_submit', methods: ['GET', 'POST'])]
-    public function adminNewFormSubmit(Request $request, SluggerInterface $slugger): Response
+    public function adminNewFirmSubmit(Request $request, SluggerInterface $slugger, ResetPasswordHelperInterface $resetPasswordHelper, MailerInterface $mailer): Response
     {
-
+        // dd($request->request);
         // ag: empty error array to collect errors while processing new firm and users
         $errors = array();
         $now = new \DateTime();
@@ -155,7 +164,7 @@ class AdminUserAccessController extends AbstractController
                         $newFilename
                     );
                 } catch (FileException $e) {
-                    dd($e->getMessage());
+                    // dd($e->getMessage());
                     // Handle exception / log
                     $errors[] = [
                         'error_type' => 'Firm logo upload error.',
@@ -171,7 +180,6 @@ class AdminUserAccessController extends AbstractController
             $this->em->persist($newFirm);
             $this->em->flush($newFirm);
 
-
             // ag: if firm was created then go on to add the firmUserProfile
             if ($newFirm) {
                 // ag: created the new user
@@ -184,6 +192,11 @@ class AdminUserAccessController extends AbstractController
                 if ($newUserForm->isSubmitted() && $newUserForm->isValid()) {
                     $newUser->setCreatedDate($now);
                     $newUser->setUpdatedDate($now);
+
+                    // ag: add the firstLogin tokens to be used below to send welcome email
+                    $newUserToken = ByteString::fromRandom(32)->toString();
+                    $newUser->setFirstLoginToken($newUserToken);
+                    $newUser->setFirstLoginTokenExpiresAt(new \DateTimeImmutable('+7 days'));
 
                     $this->em->persist($newUser);
                     $this->em->flush($newUser);
@@ -204,13 +217,36 @@ class AdminUserAccessController extends AbstractController
                     $firmUserProfileForm->handleRequest($request);
 
                     // dd(iterator_to_array($firmUserProfileForm->getErrors(true, true)));
-
                     if ($firmUserProfileForm->isSubmitted() && $firmUserProfileForm->isValid()) {
                         $newFirmUserProfile->setCreatedDate($now);
                         $newFirmUserProfile->setUpdatedDate($now);
 
                         $this->em->persist($newFirmUserProfile);
                         $this->em->flush($newFirmUserProfile);
+
+                        // ag: once newfirmUserProfile is create send out email to set password
+                        try {
+                            $email = (new TemplatedEmail())
+                                ->from($this->params->get('from_email'))
+                                ->to($newUser->getEmail())
+                                ->subject($this->params->get('app_name') . '*****' . 'New User Password Setup' . '*****')
+                                ->htmlTemplate('emails/newUserWelcomeEmail.html.twig')
+                                ->textTemplate('emails/newUserWelcomeEmail.txt.twig')
+                                ->context([
+                                    'user' => $newUser,
+                                    'setPasswordUrl' => $this->generateUrl('app_set_password', [
+                                        'token' => $newUser->getFirstLoginToken(),
+                                    ], UrlGeneratorInterface::ABSOLUTE_URL),
+                                    'tokenLifetime' => '7 days',
+                                ]);
+
+                            $mailer->send($email);
+                        } catch (FileException $e) {
+                            $errors[] = [
+                                'error_type' => 'New User Welcome Email Failure',
+                                'error_message' => $e->getMessage(),
+                            ];
+                        }
                     } else {
                         $errors[] = [
                             'error_type' => 'New Firm User Profile Form Error',
@@ -230,7 +266,7 @@ class AdminUserAccessController extends AbstractController
         if (empty($errors)) {
             $data = [
                 'success' => true,
-                'message' => 'New Firm and Primary User Successfully Added',
+                'message' => 'New Firm and Primary User Successfully Added, along with Email.',
             ];
         } else {
             $data = [

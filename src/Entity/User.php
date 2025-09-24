@@ -37,6 +37,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'is_active', type: 'boolean', nullable: false, options: ['default' => true])]
     private ?bool $isActive;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $firstLoginToken = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $firstLoginTokenExpiresAt = null;
+
     #[Gedmo\Timestampable(on: 'create')]
     #[ORM\Column(name: 'created_date', type: 'datetime', options: ['default' => "CURRENT_TIMESTAMP"])]
     private ?\DateTime $createdDate;
@@ -138,6 +144,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->isActive = $status;
 
         return $this;
+    }
+
+    public function getFirstLoginToken(): ?string
+    {
+        return $this->firstLoginToken;
+    }
+
+    public function setFirstLoginToken(?string $token): self
+    {
+        $this->firstLoginToken = $token;
+        return $this;
+    }
+
+    public function getFirstLoginTokenExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->firstLoginTokenExpiresAt;
+    }
+
+    public function setFirstLoginTokenExpiresAt(?\DateTimeInterface $expiresAt): self
+    {
+        $this->firstLoginTokenExpiresAt = $expiresAt;
+        return $this;
+    }
+
+    public function isFirstLoginTokenValid(string $token): bool
+    {
+        return $this->firstLoginToken === $token &&
+            $this->firstLoginTokenExpiresAt &&
+            $this->firstLoginTokenExpiresAt > new \DateTimeImmutable();
     }
 
     public function getCreatedDate(): ?\DateTime

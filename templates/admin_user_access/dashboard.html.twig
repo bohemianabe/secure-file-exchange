@@ -4,8 +4,23 @@
 {% block title %}Admin Dashboard{% endblock title %}
 
 {% block body %}
-    <div class="admin-title-bar">
-        <h1 class="h3 mb-3">Welcome, {{ app.user.getUserProfile().getUserFullName() }}!</h1>
+    <h1 class="h3 mb-3">Welcome back, {{ app.user.getUserProfile().getUserFullName() }}!</h1>
+    <div class="row text-center mb-4">
+        <div class="col d-flex flex-wrap justify-content-center admin-dashboard-metric-div">
+            <canvas id="admin-dashboard-metric-1"></canvas>
+            {# <p class="w-100">Active Users</p> #}
+        </div>
+        <div class="col d-flex flex-wrap justify-content-center admin-dashboard-metric-div">
+            <canvas id="admin-dashboard-metric-2"></canvas>
+            {# <p class="w-100">Storage Plans</p> #}
+        </div>
+        {# <div class="col">
+            <canvas id="metric3"></canvas>
+            <p>Storage Used</p>
+        </div> #}
+    </div>
+
+    <div class="admin-title-bar mt-4">
 
         <div class="admin-title-bar-btns text-end">
 
@@ -42,7 +57,7 @@
                     <td>{{ firm.getAccount() }}</td>
                     <td>{{ firm.getStoragePlan().name }}</td>
                     <td>{{ firm.getPhone() }}</td>
-                    <td>{% if firm.getActive() == true %}Active{% else %}Deactive{% endif %}</td>
+                    <td>{% if firm.getActive() == true %}Active{% else %}Inactive{% endif %}</td>
                     <td>{{ firm.getCreatedDate()|date('Y-m-d') }}</td>
                     <td>{{ firm.getUpdatedDate()|date('Y-m-d') }}</td>
                     <td>
@@ -54,6 +69,106 @@
         </table>
     </div>
 
+    {% block javascript %}
+
+        <script>
+            {# ag: use this to get root colors set in css #}
+            const root = getComputedStyle(document.documentElement);
+
+            const primaryColor = root.getPropertyValue('--color-primary').trim();
+            const secondaryColor = root.getPropertyValue('--color-secondary').trim();
+            const accentColor = root.getPropertyValue('--color-accent').trim();
+
+            // Encode PHP array into a JS object
+            const plans = {{ chartData.storagePlanMetrics|json_encode|raw }};
+
+            // Extract labels and values
+            const labels = Object.keys(plans);
+            const values = Object.values(plans);
+
+            const ctx = document.getElementById('admin-dashboard-metric-2');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [primaryColor, secondaryColor, accentColor],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'right', labels: { boxWidth: 20, padding: 15}, align: 'center' },
+                        datalabels: {
+                            color: '#fff',
+                            font: {
+                                weight: 'bold'
+                            },
+                            formatter: (value, ctx) => {
+                                return value.toFixed(1) + '%'; // show percentages
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Storage Plans',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                        },
+                    }
+                },
+                plugins: [ChartDataLabels] // register plugin
+            });
+
+            const createCircleChart = (id, value, color) => {
+                new Chart(document.getElementById(id), {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [value, 100 - value],
+                            backgroundColor: [color, '#e5e7eb'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        cutout: '75%',
+                        plugins: { 
+                            legend: { display: false }, 
+                            tooltip: { enabled: false },
+                            title: {
+                                display: true,
+                                text: 'Active Firms',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                },
+                            },
+                         },
+                    },
+                    plugins: [{
+                        id: 'centerText',
+                        beforeDraw: (chart) => {
+                            const { ctx, chartArea: { width, height } } = chart;
+                            ctx.save();
+                            ctx.font = 'bold 20px sans-serif';
+                            ctx.fillStyle = '#111827';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(value + '%', width / 2, height / 2);
+                        }
+                    }]
+                });
+            };
+
+            createCircleChart('admin-dashboard-metric-1', {{ chartData.activeFirmMetrics }}, primaryColor);
+            {# createCircleChart('admin-dashboard-metric-2', 42, '#10b981'); // 42% #}
+            {# createCircleChart('metric3', 85, '#ef4444'); // 85% #}
+        </script>
+    {% endblock %}
     {# ag: iterate modals needed, passed from the controller #}
     {% for modal in modals_to_include %}
         {% include 'layouts/modals/' ~ modal %}
