@@ -15,6 +15,7 @@ security:
             security: false
         main:
             lazy: true
+            stateless: false
             provider: app_user_provider
             form_login:
                 login_path: app_login
@@ -50,6 +51,16 @@ security:
         - { path: ^/.*, roles: ROLE_USER }
 when@test:
     security:
+        # firewalls:
+        #     main:
+        #         lazy: true
+        #         provider: app_user_provider
+        #         # completely disable auth in tests
+        #         http_basic: ~
+        #         anonymous: true
+        #     access_control:
+        #         # Allow everything in test env
+        #         - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         password_hashers:
             # By default, password hashers are resource intensive and take time. This is
             # important to generate secure password hashes. In tests however, secure hashes
@@ -60,3 +71,4 @@ when@test:
                 cost: 4 # Lowest possible value for bcrypt
                 time_cost: 3 # Lowest possible value for argon
                 memory_cost: 10 # Lowest possible value for argon
+
