@@ -45,12 +45,12 @@ class AdminUserAccessController extends AbstractController
             'states' => $this->_fetchAll(States::class),
             'firm_user_types' => $this->firmUserTypes,
             // ag: variable to pass in needed modals for the dashboard page.
-            'modals_to_include' => ['adminAddNewFirm.html.twig'],
+            'modals_to_include' => ['adminAddNewFirm.html.twig', 'adminImportFirm.html.twig'],
             'chartData' => ['activeFirmMetrics' => $this->_getActiveFirmMetrics(), 'storagePlanMetrics' => $this->_getStoragePlanMetrics()],
         ]);
     }
 
-    #[Route('/admin/firm_view/{firm}', name: 'admin_firm_view')]
+    #[Route('/admin/firm-view/{firm}', name: 'admin_firm_view')]
     public function adminFirmViewPage(Request $request, Firms $firm): Response
     {
         // dd($firm->getFirmUserProfiles());
@@ -62,7 +62,7 @@ class AdminUserAccessController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/firm_user/new/{firmId}/modal', name: 'admin_new_firm_user_modal')]
+    #[Route('/admin/firm-user/new/{firmId}/modal', name: 'admin_new_firm_user_modal')]
     public function adminNewFirmUserProfileModal(Request $request, $firmId)
     {
         $firm = $this->em->getRepository(Firms::class)->find($firmId);
@@ -115,7 +115,7 @@ class AdminUserAccessController extends AbstractController
         }
     }
 
-    #[Route('/admin/deactivate_firm/{firm}', name: 'admin_toggle_firm_status')]
+    #[Route('/admin/deactivate-firm/{firm}', name: 'admin_toggle_firm_status')]
     public function adminTogglerFirmStatus(Request $request, ?Firms $firm)
     {
         $now = new \DateTime();
@@ -130,12 +130,31 @@ class AdminUserAccessController extends AbstractController
         return $this->redirect($request->headers->get('referer'));
     }
 
+    #[Route('/admin/download-firm-import-csv', name: 'admin_download_firm_import_template_csv')]
+    public function adminImportFirmDownload()
+    {
+        // dd('here');
+        $csvContent = <<<CSV
+            firm_name,firm_account,storage_plan,addr1,addr2,city,state,zip,phone,active,user_email,user_password,user_roles,profile_first_name,profile_last_name,profile_title,profile_phone,profile_user_type,profile_bulk_action,profile_see_all_files,profile_contact_user
+            Test Firm,testfirm123,professional,"200 W. Braddock Rd","",Alexandria,VA,22202,303-999-6683,1,johndoe@example.com,testpassword123,"ROLE_FIRM",John,Doe,CEO,123-456-7890,primary,true,true,true
+            CSV;
+
+        return new Response(
+            $csvContent,
+            200,
+            [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="export.csv"',
+            ]
+        );
+    }
+
     //*
     //
     // ag: ********************************************** ajax calls below here **********************************
     //
     //*
-    #[Route('/admin/ajax/new-firm-submit', name: 'admin_new_firm_submit', methods: ['GET', 'POST'])]
+    #[Route('/admin/ajax/new-firm-submit', name: 'admin_new_firm_submit', methods: ['POST'])]
     public function adminNewFirmSubmit(Request $request, SluggerInterface $slugger, ResetPasswordHelperInterface $resetPasswordHelper, MailerInterface $mailer): Response
     {
         // dd($request->request);

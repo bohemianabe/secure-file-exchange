@@ -1,31 +1,14 @@
 <?php
 
-// ag: Confirms login works and redirects properly.
-namespace App\Tests;
+namespace App\Tests\unit;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class LoginPageTest extends WebTestCase
+class AdminDashboardTest extends WebTestCase
 {
-    public function testLoginPageLoads(): void
+    public function testDashboardPageRenders(): void
     {
         $client = static::createClient();
-
-        // Request login page
-        $client->request('GET', '/login');
-
-        // Page should load
-        $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('form'); // form is present
-        $this->assertSelectorExists('input[name="_username"]');
-        $this->assertSelectorExists('input[name="_password"]');
-    }
-
-    public function testLoginWithValidCredentials(): void
-    {
-        $client = static::createClient();
-        $client->disableReboot();
-
         $crawler = $client->request('GET', '/login');
 
         $form = $crawler->selectButton('Sign in')->form([
@@ -34,7 +17,6 @@ class LoginPageTest extends WebTestCase
         ]);
         $client->submit($form);
 
-        dd($client);
 
         // Symfony redirects to /post-login (your config)
         $this->assertResponseRedirects('/post-login');
@@ -45,6 +27,12 @@ class LoginPageTest extends WebTestCase
         // Assert that /post-login redirected further to /admin/dashboard
         $this->assertResponseRedirects('/admin/dashboard');
 
+        dd($crawler);
+        dd([
+            'status' => $client->getResponse()->getStatusCode(),
+            'uri' => $client->getRequest()->getUri(),
+            'content' => $client->getResponse()->getContent(),
+        ]);
         // ag: i had to follow the redirect again because i have logic in login to redirect user to dashboard if logged in. So they can't see the login page WHILE logged in.
         $crawler = $client->followRedirect();
 

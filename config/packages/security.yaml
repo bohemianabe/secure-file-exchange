@@ -24,7 +24,7 @@ security:
                 default_target_path: app_post_login
                 # ag: something weird was happening with login so I added this.
                 always_use_default_target_path: true
-                enable_csrf: true
+                enable_csrf: false
             logout:
                 path: app_logout
                 # where to redirect after logout
@@ -44,23 +44,25 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/(login|reset-password|set-password), roles: PUBLIC_ACCESS }
+        # - { path: ^/admin/ajax/new-firm-submit, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/firm, roles: ROLE_FIRM }
         - { path: ^/client, roles: ROLE_CLIENT }
         - { path: ^/post-login, roles: ROLE_USER }
         - { path: ^/.*, roles: ROLE_USER }
 when@test:
+    framework:
+        test: true
+        session:
+            enabled: true
+            storage_factory_id: session.storage.factory.mock_file
+
     security:
-        # firewalls:
-        #     main:
-        #         lazy: true
-        #         provider: app_user_provider
-        #         # completely disable auth in tests
-        #         http_basic: ~
-        #         anonymous: true
-        #     access_control:
-        #         # Allow everything in test env
-        #         - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        firewalls:
+            main:
+                lazy: true
+                provider: app_user_provider
+                stateless: true # no session needed
         password_hashers:
             # By default, password hashers are resource intensive and take time. This is
             # important to generate secure password hashes. In tests however, secure hashes

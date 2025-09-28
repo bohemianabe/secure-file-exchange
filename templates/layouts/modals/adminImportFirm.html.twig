@@ -1,0 +1,51 @@
+<div class="modal fade" id="adminImportFirmModal" tabindex="-1" aria-labelledby="adminImportFirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div method="post" action="">
+        <div class="modal-header bg-secondary text-white">
+          <h5 class="modal-title" id="adminImportFirmModalLabel">Import Firms</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+            <div class="container mb-3">
+                <div class="row">
+
+                    <div class="mb-3 ">
+
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="col-12 d-flex justify-content-between">
+                        <div>
+                            <label for="logo" class="form-label">IMPORT- MAX SIZE 2M</label>
+                            <span data-bs-toggle="tooltip" data-bs-placement="top" title="Please make sure your CSV is properly formatted. Download and use the templated CSV.">
+                            <small><i class="fas fa-question-circle"></i></small> 
+                            </span>
+                        </div>
+                        <button type="button" id="clear-logo" class="btn btn-outline-secondary btn-sm">
+                            Clear
+                        </button>
+
+                        </div>
+                        <input type="file" id="admin-import-firm-file" name="firm-import-csv-file" class="form-control">
+                    </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+            <a href="{{ path('admin_download_firm_import_template_csv') }}">
+                <small class="fst-italic">Download Firm Import Template CSV</small>
+            </a>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <a type="submit" href="" class="btn btn-primary" id="">
+            Import
+        </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

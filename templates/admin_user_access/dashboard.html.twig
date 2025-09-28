@@ -24,11 +24,16 @@
 
         <div class="admin-title-bar-btns text-end">
 
-            <a class="btn btn-primary" data-bs-toggle="modal" data-modal-title="" data-bs-target="#adminAddFirmModal">
+            <a class="btn btn-primary" data-bs-toggle="modal" data-modal-title="Add New Firm" data-bs-target="#adminAddFirmModal">
                 <i class="fas fa-plus me-2"></i> Add New Firm            
             </a>
-            <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#importFirms">Import Firms</button>
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#adminImportFirmModal">Import Firms</button>
 
+        </div>
+        <div>
+            <a href="{{ path('admin_download_firm_import_template_csv') }}">
+                Download Firm Import Template CSV
+            </a>
         </div>
 
     </div>

@@ -31,3 +31,31 @@ li.nav-item.dropdown.ms-auto {
         color: #fff !important;
     }
 }
+
+/* ag: style for dataTables. Header row background + text color */
+table.dataTable thead th {
+    background-color: var(--color-accent); /* pink */
+    color: #f4f4f4; /* white text */
+    text-align: left; /* optional: align text */
+    /* padding: 10px; */
+}
+
+/* ag: style for dataTables. Default unsorted */
+table.dataTable thead .dt-column-order::after {
+    content: '⇅';
+    margin-left: 6px;
+    font-size: 0.8em;
+    color: #f4f4f4; /* white arrows by default */
+}
+
+/* ag: style for dataTables. Sorted ascending */
+table.dataTable thead th[aria-sort='ascending'] .dt-column-order::after {
+    content: '▲';
+    color: #f4f4f4;
+}
+
+/* ag: style for dataTables. Sorted descending */
+table.dataTable thead th[aria-sort='descending'] .dt-column-order::after {
+    content: '▼';
+    color: #f4f4f4;
+}
