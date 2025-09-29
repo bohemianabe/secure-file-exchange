@@ -31,7 +31,7 @@ const notyf = new Notyf({
         {
             type: 'error',
             background: 'indianred',
-            duration: 4000,
+            duration: 0,
             dismissible: true,
         },
     ],
@@ -63,10 +63,12 @@ $(document).on('click', '[data-dynamic-load]', function (e) {
 // ag: attached notyf to the window object so I can access it globally.
 window.notyf = notyf;
 
-document.getElementById('clear-logo').addEventListener('click', function () {
-    const fileInput = document.getElementById('company-logo-input');
-    fileInput.value = ''; // reset the input
-});
+if (document.getElementById('clear-file-input')) {
+    document.getElementById('clear-file-input').addEventListener('click', function () {
+        const fileInput = document.getElementById('company-logo-input');
+        fileInput.value = ''; // reset the input
+    });
+}
 
 // notyf.open({
 //     type: 'warning',

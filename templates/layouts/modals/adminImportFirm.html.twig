@@ -8,30 +8,26 @@
         </div>
 
         <div class="modal-body">
+          <form class="form-part" id="form-admin-import-csv">
             <div class="container mb-3">
                 <div class="row">
-
                     <div class="mb-3 ">
+                      <div class="d-flex flex-wrap align-items-center gap-2">
+                          <div class="col-12 d-flex justify-content-between">
+                          <div>
+                              <label for="logo" class="form-label">IMPORT- MAX SIZE 2M</label>
+                              <span data-bs-toggle="tooltip" data-bs-placement="top" title="Please make sure your CSV is properly formatted. Download and use the templated CSV.">
+                              <small><i class="fas fa-question-circle"></i></small> 
+                              </span>
+                          </div>
+                          <button type="button" id="clear-file-input-2" class="btn btn-outline-secondary btn-sm">
+                              Clear
+                          </button>
 
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        <div class="col-12 d-flex justify-content-between">
-                        <div>
-                            <label for="logo" class="form-label">IMPORT- MAX SIZE 2M</label>
-                            <span data-bs-toggle="tooltip" data-bs-placement="top" title="Please make sure your CSV is properly formatted. Download and use the templated CSV.">
-                            <small><i class="fas fa-question-circle"></i></small> 
-                            </span>
-                        </div>
-                        <button type="button" id="clear-logo" class="btn btn-outline-secondary btn-sm">
-                            Clear
-                        </button>
-
-                        </div>
-                        <input type="file" id="admin-import-firm-file" name="firm-import-csv-file" class="form-control">
+                          </div>
+                          <input type="file" id="admin-import-firm-file" name="firm-import-csv-file" class="form-control">
+                      </div>
                     </div>
-
-                    </div>
-
-
                 </div>
             </div>
             <a href="{{ path('admin_download_firm_import_template_csv') }}">
@@ -41,9 +37,10 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <a type="submit" href="" class="btn btn-primary" id="">
-            Import
-        </a>
+          <button type="submit" href="" class="btn btn-primary" id="admin-import-firm-csv-submit">
+            <span class="btn-text">Import</span>
+            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+          </button>
         </div>
       </div>
     </div>

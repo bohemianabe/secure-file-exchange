@@ -110,39 +110,39 @@ class AdminAddNewFirmModalTest extends WebTestCase
         // $csrfTokenManager = $container->get(CsrfTokenManagerInterface::class);
         // dd($client);
         // Simulate a POST request with firm, user, and firmUserProfile data
-        // $client->request('POST', '/admin/ajax/new-firm-submit', [
-        // 'firm' => [
-        //     'name' => 'Test Firm',
-        //     'account' => 'testfirm123',
-        //     'storagePlan' => '42',
-        //     'addr1' => '200 W. Braddock Rd',
-        //     'addr2' => '',
-        //     'city' => 'Alexandria',
-        //     'state' => 'VA',
-        //     'zip' => '22202',
-        //     'phone' => '303-999-6683',
-        //     'active' => '1',
-        //     // '_token' => $csrfTokenManager->getToken('firm')->getValue(),
-        //     'logo' => null, // skip file upload for now
-        // ],
-        // 'user' => [
-        //     'email' => 'johndoe@example.com',
-        //     'password' => 'testpassword123',
-        //     'roles' => ['ROLE_FIRM'],
-        //     // '_token' => $csrfTokenManager->getToken('user')->getValue(),
-        // ],
-        // 'firm_user_profile' => [
-        //     'firstName' => 'John',
-        //     'lastName' => 'Doe',
-        //     'title' => 'CEO',
-        //     'phone' => '123-456-7890',
-        //     'userType' => 'primary',
-        //     'bulkAction' => true,
-        //     'seeAllFiles' => true,
-        //     'contactUser' => true,
-        //     // '_token' => $csrfTokenManager->getToken('firm_user_profile')->getValue(),
-        // ],
-        // ]);
+        $client->request('POST', '/admin/ajax/new-firm-submit', [
+            'firm' => [
+                'name' => 'Test Firm',
+                'account' => 'testfirm123',
+                'storagePlan' => '42',
+                'addr1' => '200 W. Braddock Rd',
+                'addr2' => '',
+                'city' => 'Alexandria',
+                'state' => 'VA',
+                'zip' => '22202',
+                'phone' => '303-999-6683',
+                'active' => '1',
+                // '_token' => $csrfTokenManager->getToken('firm')->getValue(),
+                'logo' => null, // skip file upload for now
+            ],
+            'user' => [
+                'email' => 'johndoe@example.com',
+                'password' => 'testpassword123',
+                'roles' => ['ROLE_FIRM'],
+                // '_token' => $csrfTokenManager->getToken('user')->getValue(),
+            ],
+            'firm_user_profile' => [
+                'firstName' => 'John',
+                'lastName' => 'Doe',
+                'title' => 'CEO',
+                'phone' => '123-456-7890',
+                'userType' => 'primary',
+                'bulkAction' => true,
+                'seeAllFiles' => true,
+                'contactUser' => true,
+                // '_token' => $csrfTokenManager->getToken('firm_user_profile')->getValue(),
+            ],
+        ]);
 
         // $this->assertResponseIsSuccessful();
         // $this->assertResponseHeaderSame('content-type', 'application/json');

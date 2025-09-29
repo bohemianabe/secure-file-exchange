@@ -23,6 +23,13 @@ function validateFirmFormFields(selector, firmAccountUrl) {
     return isValid;
 }
 
+if (document.getElementById('clear-file-input-2')) {
+    document.getElementById('clear-file-input-2').addEventListener('click', function () {
+        const fileInput = document.getElementById('admin-import-firm-file');
+        fileInput.value = ''; // reset the input
+    });
+}
+
 // ag: since button is in a modal that isn't visible must pass function to the DOM
 $(document).on('click', '#admin-reset-firm-user-password', function (e) {
     const firmUserProfileId = e.currentTarget.getAttribute('data-firm-user-id');
@@ -180,6 +187,43 @@ jQuery(function ($) {
                 },
             });
         }
+    });
+
+    $('#admin-import-firm-csv-submit').on('click', function (e) {
+        e.preventDefault();
+        let $btn = $(this);
+
+        // ag: set spinner on submit button
+        // $btn.find('.btn-text').addClass('d-none');
+        // $btn.find('.spinner-border').removeClass('d-none');
+        // $btn.prop('disabled', true);
+
+        const formData = new FormData();
+        const fileInput = document.getElementById('admin-import-firm-file');
+
+        formData.append('file', fileInput.files[0]);
+
+        $.ajax({
+            url: '/admin/firm-import-csv/submit',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success(data) {
+                if (data.success) {
+                    $('#adminAddFirmModal').modal('hide');
+                    // ag: window.notyf set globally in root app.js file
+                    window.notyf.success(data.message);
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 4000);
+                } else {
+                    $('#adminAddFirmModal').modal('hide');
+                    window.notyf.error(data.message);
+                }
+            },
+        });
     });
 
     // ag: logic for the update btn from the firm_view for the firm data
