@@ -1,3 +1,5 @@
+import * as bootstrap from 'bootstrap';
+
 // ag: file for all the JS logic for admin view
 function validateFirmFormFields(selector, firmAccountUrl) {
     let isValid = true;
@@ -23,9 +25,48 @@ function validateFirmFormFields(selector, firmAccountUrl) {
     return isValid;
 }
 
-if (document.getElementById('clear-file-input-2')) {
-    document.getElementById('clear-file-input-2').addEventListener('click', function () {
-        const fileInput = document.getElementById('admin-import-firm-file');
+// ag: function to handle returned ajax data
+function handleAjaxReturnedData(data, btnObject) {
+    let modal = btnObject.closest('.modal');
+    let modalInstance = bootstrap.Modal.getInstance(modal[0]);
+
+    if (data.success == true) {
+        // ag: if successful clear out form, don't do it if it fails
+        let form = modal.find('form')[0];
+        if (form) {
+            form.reset();
+        }
+
+        // optional: also clear file input preview if you have one
+        $(modal).find('input[type="file"]').val('');
+        // bootstrap 5 API: hide modal
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+        // ag: window.notyf set globally in root app.js file
+        window.notyf.success(data.message);
+        setTimeout(function () {
+            window.location.reload();
+        }, 4000);
+    } else {
+        // ag: if fail don't close modal. keep open for users descretion
+        // if (modalInstance) {
+        //     modalInstance.hide();
+        // }
+        window.notyf.error(data.message);
+    }
+}
+
+if (document.getElementById('admin-clear-firm-csv-input')) {
+    document.getElementById('admin-clear-firm-csv-input').addEventListener('click', function () {
+        const fileInput = document.getElementById('admin-firm-csv-input');
+        fileInput.value = ''; // reset the input
+    });
+}
+
+if (document.getElementById('clear-file-input')) {
+    document.getElementById('clear-file-input').addEventListener('click', function () {
+        const fileInput = document.getElementById('file-input');
         fileInput.value = ''; // reset the input
     });
 }
@@ -191,15 +232,15 @@ jQuery(function ($) {
 
     $('#admin-import-firm-csv-submit').on('click', function (e) {
         e.preventDefault();
-        let $btn = $(this);
+        let btn = $(this);
 
         // ag: set spinner on submit button
-        // $btn.find('.btn-text').addClass('d-none');
-        // $btn.find('.spinner-border').removeClass('d-none');
-        // $btn.prop('disabled', true);
+        btn.find('.btn-text').addClass('d-none');
+        btn.find('.spinner-border').removeClass('d-none');
+        btn.prop('disabled', true);
 
         const formData = new FormData();
-        const fileInput = document.getElementById('admin-import-firm-file');
+        const fileInput = document.getElementById('admin-firm-csv-input');
 
         formData.append('file', fileInput.files[0]);
 
@@ -211,17 +252,38 @@ jQuery(function ($) {
             contentType: false,
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
             success(data) {
-                if (data.success) {
-                    $('#adminAddFirmModal').modal('hide');
-                    // ag: window.notyf set globally in root app.js file
-                    window.notyf.success(data.message);
-                    setTimeout(function () {
-                        window.location.reload();
-                    }, 4000);
-                } else {
-                    $('#adminAddFirmModal').modal('hide');
-                    window.notyf.error(data.message);
-                }
+                handleAjaxReturnedData(data, btn);
+                // if (data.success) {
+                //     if (data.success) {
+                //         // find the closest modal to the button
+                //         let modal = btn.closest('.modal');
+
+                //         // bootstrap 5 API: hide modal
+                //         let modalInstance = bootstrap.Modal.getInstance(modal[0]);
+                //         if (modalInstance) {
+                //             modalInstance.hide();
+                //         }
+                //     }
+                //     // ag: window.notyf set globally in root app.js file
+                //     window.notyf.success(data.message);
+                //     setTimeout(function () {
+                //         window.location.reload();
+                //     }, 4000);
+                // } else {
+                //     // find the closest modal to the button
+                //     let modal = btn.closest('.modal');
+                //     let modalInstance = bootstrap.Modal.getInstance(modal[0]);
+                //     if (modalInstance) {
+                //         modalInstance.hide();
+                //     }
+                //     window.notyf.error(data.message);
+                // }
+            },
+            complete: function () {
+                // Restore button
+                btn.find('.btn-text').removeClass('d-none');
+                btn.find('.spinner-border').addClass('d-none');
+                btn.prop('disabled', false);
             },
         });
     });

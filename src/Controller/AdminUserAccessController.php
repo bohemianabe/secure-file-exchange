@@ -17,6 +17,7 @@ use App\Form\FirmType;
 use App\Form\FirmUserProfileType;
 use App\Form\UserType;
 use Doctrine\ORM\EntityManager;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -133,8 +134,14 @@ class AdminUserAccessController extends AbstractController
 
     #[Route('/admin/download-firm-import-csv', name: 'admin_download_firm_import_template_csv')]
     #[Route('/admin/firm-import-csv/submit', name: 'admin_firm_import_submit', methods: ['POST'])]
-    public function adminImportFirmDownload(Request $request)
+    public function adminImportFirmDownload(Request $request, ManagerRegistry $registry)
     {
+        // ag: arrays for the csv template
+        $csvHeader = ['firm_name', 'firm_account', 'firm_storage_plan', 'firm_addr1', 'firm_addr2', 'firm_city', 'firm_state', 'firm_zip', 'firm_phone', 'firm_active', 'user_email', 'profile_first_name', 'profile_last_name', 'profile_title', 'profile_phone', 'profile_bulk_action', 'profile_see_all_files', 'profile_contact_user'];
+
+        // Example row of demo data
+        $exampleRow = ['Test Firm', 'testfirm123', 'professional', '1800 Pennsylvania Ave', '', 'Alexandria', 'VA', '22202', '333-999-6666', 'true', 'johndoe@example.com', 'John', 'Doe', 'CEO', '123-456-7890', 'true', 'true', 'true'];
+
         if ($request->get('_route') == 'admin_firm_import_submit') {
             $file = $request->files->get('file');
 
@@ -156,181 +163,259 @@ class AdminUserAccessController extends AbstractController
                 fclose($handle);
             }
 
-            // Transform each row into separate arrays
-            $errors = [];
+            // ag: safety check makes sure CSV header row matches the expected fields
+            $headerArrayCheck = array_diff($header, $csvHeader);
 
-            // ag: get names of plans. Use array_map since entityManger returns an object
-            $storagePlans = array_map(
-                fn($plan) => strtolower($plan->getName()),
-                $this->em->getRepository(StoragePlans::class)->findAll()
-            );
-
-            $states = array_map(
-                fn($state) => strtoupper($state->getCode()),
-                $this->em->getRepository(States::class)->findAll()
-            );
-
-            $trueFalseColumns = ['firm_active', 'profile_bulk_action', 'profile_see_all_files', 'profile_contact_user'];
-
-            // ag: parse through the CSV and make the final array to import if no errors are found.
-            $transformed = array_map(function ($row) use (&$errors, $storagePlans, $states, $trueFalseColumns) {
-                $firm = [];
-                $user = [];
-                $profile = [];
-
-                foreach ($row as $key => $value) {
-                    // normalize blank values
-                    $value = trim((string)$value);
-                    $sendEmail = false;
-
-                    if (str_starts_with($key, 'firm_')) {
-                        $cleanKey = str_replace('firm_', '', $key);
-
-                        // === FIRM ACCOUNT CHECK ===
-                        if ($cleanKey === 'account') {
-                            $normalized = strtolower(preg_replace('/[^a-z0-9]/', '', $value));
-                            if ($normalized !== $value) {
-                                $errors[] = [
-                                    'message' => 'firm_account: ' . $value . '/ must be a lowercase one word.'
-                                ];
-                            }
-                            $value = $normalized;
-                        }
-
-                        // === FIRM NAME CHECK ===
-                        if ($cleanKey === 'name' && $value === '') {
-                            $errors[] = [
-                                'message' => 'firm_name: ' . $value . '/ Firm name cannot be empty.',
-                            ];
-                        }
-
-                        // === STORAGE PLAN CHECK ===
-                        if ($cleanKey === 'storage_plan') {
-                            if (!in_array(strtolower($value), $storagePlans)) {
-                                $errors[] = [
-                                    'message' => 'firm_storage_plan: ' . $value . '/ Storage plan does not exist in storage_plans table.',
-                                ];
-                            }
-                        }
-
-                        // === STATE CHECK ===
-                        if ($cleanKey === 'state') {
-                            $value = strtoupper($value);
-                            if (!in_array($value, $states)) {
-                                $errors[] = [
-                                    'message' => 'firm_state: ' . $value . '/ Firm state must be a valid 2-letter code from states table.',
-                                ];
-                            }
-                        }
-
-                        // === TRUE/FALSE columns ===
-                        if (in_array($key, $trueFalseColumns)) {
-                            $value = strtolower($value) === 'true' ? true : false;
-                        }
-
-                        $firm[$cleanKey] = $value;
-                    } elseif (str_starts_with($key, 'user_')) {
-                        $cleanKey = str_replace('user_', '', $key);
-
-                        // === USER EMAIL CHECK ===
-                        if ($cleanKey === 'email') {
-                            if ($value === '' || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                                $errors[] = [
-                                    'message' => 'user_email: ' . $value . '/ User email cannot be empty and must be valid.',
-                                ];
-                            }
-                        }
-
-                        $user[$cleanKey] = $value;
-                    } elseif (str_starts_with($key, 'profile_')) {
-                        $cleanKey = str_replace('profile_', '', $key);
-
-                        // === TRUE/FALSE columns in profile ===
-                        if (in_array($key, $trueFalseColumns)) {
-                            $value = strtolower($value) === 'true' ? true : false;
-                        }
-
-                        $profile[$cleanKey] = $value;
-                    } elseif ($key == 'send_welcome_email') {
-                        if (trim((string)$value) == 'TRUE') {
-                            $sendEmail = true;
-                        }
-                    }
-                }
-
-                return [
-                    'firm'              => $firm,
-                    'user'              => $user,
-                    'firm_user_profile' => $profile,
-                    'send_welcome_email' => $sendEmail,
-                ];
-            }, $rows);
-
-            // After processing, inspect any errors
-            // dd($errors[0]['message']);
-            if (!empty($errors)) {
+            if (!empty($headerArrayCheck)) {
                 return new JsonResponse([
                     'success' => false,
-                    'message' => $errors[0]['message'] . ' Please review your file and resubmit.',
+                    'message' => 'CSV headers didn\'t match expected fields. Please use the download-able template.',
                 ]);
             } else {
+                // ag: headers are good proceed to safety value checks
+                $errors = [];
 
-                // ag: now the data to the db
-                $accessor = PropertyAccess::createPropertyAccessor();
+                // ag: get names of plans. Use array_map since entityManger returns an object
+                $storagePlans = array_map(
+                    fn($plan) => strtolower($plan->getName()),
+                    $this->em->getRepository(StoragePlans::class)->findAll()
+                );
+                // dd($storagePlans);
 
-                // foreach ($transformed as $row) {
-                //     dd($row);
-                //     // ag: establish the entities
-                //     $firm = new Firms();
-                //     $user = new User();
-                //     $profile = new FirmUserProfiles();
+                $states = array_map(
+                    fn($state) => strtoupper($state->getCode()),
+                    $this->em->getRepository(States::class)->findAll()
+                );
 
-                //     // Hydrate Firm
-                //     foreach ($row['firm'] as $field => $value) {
-                //         $accessor->setValue($firm, $field, $value);
-                //     }
+                $trueFalseColumns = ['firm_active', 'profile_bulk_action', 'profile_see_all_files', 'profile_contact_user'];
 
-                //     // Hydrate User
-                //     foreach ($row['user'] as $field => $value) {
-                //         $accessor->setValue($user, $field, $value);
-                //     }
+                // ag: parse through the CSV and make the final array to import if no errors are found.
+                $transformed = array_map(function ($row) use (&$errors, $storagePlans, $states, $trueFalseColumns) {
+                    $firm = [];
+                    $user = [];
+                    $profile = [];
 
-                //     // Hydrate FirmUserProfile
-                //     foreach ($row['firm_user_profile'] as $field => $value) {
-                //         $accessor->setValue($profile, $field, $value);
-                //     }
+                    foreach ($row as $key => $value) {
+                        // normalize blank values
+                        $value = trim((string)$value);
 
-                //     // Setup relations
-                //     $profile->setFirm($firm);
-                //     $profile->setUser($user);
+                        if (str_starts_with($key, 'firm_')) {
+                            $cleanKey = str_replace('firm_', '', $key);
 
-                //     // Persist everything
-                //     $this->em->persist($firm);
-                //     $this->em->persist($user);
-                //     $this->em->persist($profile);
+                            // === FIRM ACCOUNT CHECK ===
+                            if ($cleanKey === 'account') {
+                                $normalized = strtolower(preg_replace('/[^a-z0-9]/', '', $value));
+                                if ($normalized !== $value) {
+                                    $errors[] = [
+                                        'message' => 'firm_account: ' . $value . '/ must be a lowercase one word.'
+                                    ];
+                                }
+                                $value = $normalized;
+                            }
 
-                //     // Optionally: handle flags like send_welcome_email
-                //     if ($row['send_welcome_email'] ?? false) {
-                //         // queue or trigger email logic here
-                //     }
-                // }
+                            // === FIRM NAME CHECK ===
+                            if ($cleanKey === 'name' && $value === '') {
+                                $errors[] = [
+                                    'message' => 'firm_name: ' . $value . '/ Firm name cannot be empty.',
+                                ];
+                            }
 
-                // $this->em->flush();
+                            // === STORAGE PLAN CHECK ===
+                            if ($cleanKey === 'storage_plan') {
+                                if (!in_array(strtolower($value), $storagePlans)) {
+                                    $errors[] = [
+                                        'message' => 'firm_storage_plan: ' . $value . '/ Storage plan does not exist in storage_plans table.',
+                                    ];
+                                }
+                            }
+
+                            // === STATE CHECK ===
+                            if ($cleanKey === 'state') {
+                                $value = strtoupper($value);
+                                if (!in_array($value, $states)) {
+                                    $errors[] = [
+                                        'message' => 'firm_state: ' . $value . '/ Firm state must be a valid 2-letter code from states table.',
+                                    ];
+                                }
+                            }
+
+                            // === TRUE/FALSE columns ===
+                            if (in_array($key, $trueFalseColumns)) {
+                                $value = strtolower($value) === 'true' ? true : false;
+                            }
+
+                            $firm[$cleanKey] = $value;
+                        } elseif (str_starts_with($key, 'user_')) {
+                            $cleanKey = str_replace('user_', '', $key);
+
+                            // === USER EMAIL CHECK ===
+                            if ($cleanKey === 'email') {
+                                if ($value === '' || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                                    $errors[] = [
+                                        'message' => 'user_email: ' . $value . '/ User email cannot be empty and must be valid.',
+                                    ];
+                                }
+                            }
+
+                            $user[$cleanKey] = $value;
+                        } elseif (str_starts_with($key, 'profile_')) {
+                            $cleanKey = str_replace('profile_', '', $key);
+
+                            // === TRUE/FALSE columns in profile ===
+                            if (in_array($key, $trueFalseColumns)) {
+                                $value = strtolower($value) === 'true' ? true : false;
+                            }
+
+                            $profile[$cleanKey] = $value;
+                        }
+                    }
+
+                    return [
+                        'firm'              => $firm,
+                        'user'              => $user,
+                        'firm_user_profile' => $profile,
+                    ];
+                }, $rows);
+
+                // dd($errors[0]['message']);
+                // ag: if there are found errors return them with a warning
+                if (!empty($errors)) {
+                    return new JsonResponse([
+                        'success' => false,
+                        'message' => $errors[0]['message'] . ' Please review your file and resubmit.',
+                    ]);
+                } else {
+                    // ag: after passing the value checks and the data is good now process the data to the db
+                    $accessor = PropertyAccess::createPropertyAccessor();
+                    $now = new \DateTime();
+
+                    $batchSize = 20;
+                    $i = 0;
+
+                    foreach ($transformed as $row) {
+                        try {
+                            // ag: establish the entities
+                            $firm = new Firms();
+                            $user = new User();
+                            $profile = new FirmUserProfiles();
+
+                            // Hydrate Firm
+                            foreach ($row['firm'] as $field => $value) {
+
+                                try {
+                                    if ($field === 'storage_plan') {
+                                        // Lookup the StoragePlans entity by its "name"
+                                        $storagePlan = $this->em->getRepository(StoragePlans::class)
+                                            ->findOneBy(['name' => $value]);
+
+                                        // Assign the object, not the string
+                                        $firm->setStoragePlan($storagePlan);
+                                    } else {
+                                        $accessor->setValue($firm, $field, $value);
+                                    }
+                                } catch (\Throwable $e) {
+                                    $errors[] = [
+                                        'message' => $e->getMessage(),
+                                    ];
+                                }
+                            }
+
+                            // Hydrate User
+                            foreach ($row['user'] as $field => $value) {
+                                $accessor->setValue($user, $field, $value);
+                            }
+
+                            // // Hydrate FirmUserProfile
+                            foreach ($row['firm_user_profile'] as $field => $value) {
+                                $accessor->setValue($profile, $field, $value);
+                            }
+
+                            $firm->setCreatedDate($now);
+                            $firm->setUpdatedDate($now);
+
+                            $user->setIsActive(true);
+                            $user->setRoles(['ROLE_FIRM']);
+                            $user->setCreatedDate($now);
+                            $user->setUpdatedDate($now);
+
+                            // Setup relations
+                            $profile->setCreatedDate($now);
+                            $profile->setUpdatedDate($now);
+                            $profile->setFirm($firm);
+                            $profile->setUser($user);
+
+                            // Persist everything
+                            $this->em->persist($firm);
+                            $this->em->persist($user);
+                            $this->em->persist($profile);
+
+                            if (($i % $batchSize) === 0) {
+                                $this->em->flush();
+                                $this->em->clear(); // detach all entities to free memory
+
+                            }
+                            $i++;
+                        } catch (\Throwable $e) {
+                            $errors[] = [
+                                'message' => $e->getMessage(),
+                            ];
+
+                            // ag: incase the try fails and it closes the entityManger interface reset it here to get a fresh entitymangerinterface connection
+                            if (!$this->em->isOpen()) {
+                                $this->em = $registry->resetManager();
+                            }
+                        }
+                    }
+
+                    // final flush
+                    try {
+                        $this->em->flush();
+                        $this->em->clear();
+                    } catch (\Throwable $e) {
+                        $errors[] = ['message' => $e->getMessage()];
+
+                        // ag: ensure I always have a working EntityManager incase one of the rows above fails and closes the entityMangerinterface
+                        if (
+                            !$this->em instanceof EntityManagerInterface ||
+                            !$this->em->isOpen()
+                        ) {
+                            // resetManager() will clear and rebuild the EntityManager service to a fresh one if it ends up crashing during a flush() up above.
+                            $this->em = $registry->resetManager();
+                        }
+                    }
+
+                    if (empty($errors)) {
+                        return new JsonResponse([
+                            'success' => true,
+                            'message' => 'CSV successfully added.',
+                        ]);
+                    } else {
+                        return new JsonResponse([
+                            'success' => false,
+                            'message' => 'There was an issue with row(s) in your CSV. Please review your file. ' . $errors[0]['message'],
+                        ]);
+                    }
+                }
             }
         }
 
-        // ag: dynamically create template CSV
-        $csvContent = <<<CSV
-            firm_name,firm_account,firm_storage_plan,firm_addr1,firm_addr2,firm_city,firm_state,firm_zip,firm_phone,firm_active,user_email,profile_first_name,profile_last_name,profile_title,profile_phone,profile_bulk_action,profile_see_all_files,profile_contact_user,send_welcome_email
-            Test Firm,testfirm123,professional,"200 W. Braddock Rd","",Alexandria,VA,22202,303-999-6683,true,johndoe@example.com,John,Doe,CEO,123-456-7890,true,true,true,true,false
-            CSV;
+        // Convert arrays into CSV lines
+        $headerLine = implode(',', $csvHeader);
+        $dataLine   = implode(',', array_map(function ($value) {
+            // Wrap in quotes if value contains a comma or space
+            return (strpos($value, ',') !== false || strpos($value, ' ') !== false)
+                ? '"' . $value . '"'
+                : $value;
+        }, $exampleRow));
+
+        $csvContent = $headerLine . "\n" . $dataLine;
 
         return new Response(
             $csvContent,
             200,
             [
                 'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="export.csv"',
+                'Content-Disposition' => 'attachment; filename="firm-template.csv"',
             ]
         );
     }

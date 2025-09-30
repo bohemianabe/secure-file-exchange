@@ -65,3 +65,11 @@ table.dataTable thead th[aria-sort='descending'] .dt-column-order::after {
     border: var(--color-accent);
     color: #f4f4f4;
 }
+
+.notyf .notyf__toast {
+    max-width: 500px;
+}
+
+.notyf .notyf__ripple {
+    width: 800px;
+}
