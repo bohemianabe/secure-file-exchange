@@ -146,6 +146,13 @@ jQuery(function ($) {
 
     // ag: logic to handle submit of a new firm modal
     $('#admin-new-firm-submit').on('click', function (e) {
+        let btn = $(this);
+
+        // ag: set spinner on submit button
+        btn.find('.btn-text').addClass('d-none');
+        btn.find('.spinner-border').removeClass('d-none');
+        btn.prop('disabled', true);
+
         let isValidForm2 = true;
         $('#form-part-2 input').each(function (e) {
             const value = $(this).val().trim();
@@ -196,12 +203,12 @@ jQuery(function ($) {
             });
 
             // ag: add the csrf token for each form
-            $tokenFirm = $('#admin-new-firm-token').val();
-            $tokenUser = $('#admin-new-user-token').val();
-            $tokenFirmUserProfile = $('#admin-new-firm-user-profile-token').val();
-            formData.append('firm[_token]', $tokenFirm);
-            formData.append('user[_token]', $tokenUser);
-            formData.append('firm_user_profile[_token]', $tokenFirmUserProfile);
+            const tokenFirm = $('#admin-new-firm-token').val();
+            const tokenUser = $('#admin-new-user-token').val();
+            const tokenFirmUserProfile = $('#admin-new-firm-user-profile-token').val();
+            formData.append('firm[_token]', tokenFirm);
+            formData.append('user[_token]', tokenUser);
+            formData.append('firm_user_profile[_token]', tokenFirmUserProfile);
 
             $.ajax({
                 url: '/admin/ajax/new-firm-submit',
@@ -211,23 +218,53 @@ jQuery(function ($) {
                 contentType: false,
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 success(data) {
-                    if (data.success) {
-                        $('#adminAddFirmModal').modal('hide');
-                        // ag: window.notyf set globally in root app.js file
-                        window.notyf.success(data.message);
-                        setTimeout(function () {
-                            window.location.reload();
-                        }, 4000);
-                    } else {
-                        $('#adminAddFirmModal').modal('hide');
-                        window.notyf.error(data.message);
-                        setTimeout(function () {
-                            window.location.reload();
-                        }, 4000);
-                    }
+                    handleAjaxReturnedData(data, btn);
+                },
+                complete: function () {
+                    // Restore button
+                    btn.find('.btn-text').removeClass('d-none');
+                    btn.find('.spinner-border').addClass('d-none');
+                    btn.prop('disabled', false);
                 },
             });
         }
+    });
+
+    // ag: logic to add a firm user profile on the /admin/firm-view/{id} page
+    $('#admin-add-firm-user-submit').on('click', function (e) {
+        e.preventDefault();
+        let btn = $(this);
+
+        // ag: set spinner on submit button
+        btn.find('.btn-text').addClass('d-none');
+        btn.find('.spinner-border').removeClass('d-none');
+        btn.prop('disabled', true);
+
+        const firmUserProfileForm = document.querySelector('#admin-add-firm-user');
+
+        const formData = new FormData();
+
+        // ag: datapoints for the User entity
+        const userArray = ['roles', 'email'];
+        // Append user form values
+        [...new FormData(firmUserProfileForm).entries()].forEach(([key, value]) => {
+            if (userArray.includes(key)) {
+                if (key == 'roles') {
+                    formData.append('user[roles][]', value);
+                } else {
+                    formData.append(`user[${key}]`, value);
+                }
+            } else {
+                formData.append(`firm_user_profile[${key}]`, value);
+            }
+        });
+
+        const tokenUser = $('#admin-add-firm-user-profile-token').val();
+        const tokenFirmUserProfile = $('#admin-add-user-profile-token').val();
+        formData.append('user[_token]', tokenUser);
+        formData.append('firm_user_profile[_token]', tokenFirmUserProfile);
+
+        console.log(formData);
     });
 
     $('#admin-import-firm-csv-submit').on('click', function (e) {
@@ -253,31 +290,6 @@ jQuery(function ($) {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
             success(data) {
                 handleAjaxReturnedData(data, btn);
-                // if (data.success) {
-                //     if (data.success) {
-                //         // find the closest modal to the button
-                //         let modal = btn.closest('.modal');
-
-                //         // bootstrap 5 API: hide modal
-                //         let modalInstance = bootstrap.Modal.getInstance(modal[0]);
-                //         if (modalInstance) {
-                //             modalInstance.hide();
-                //         }
-                //     }
-                //     // ag: window.notyf set globally in root app.js file
-                //     window.notyf.success(data.message);
-                //     setTimeout(function () {
-                //         window.location.reload();
-                //     }, 4000);
-                // } else {
-                //     // find the closest modal to the button
-                //     let modal = btn.closest('.modal');
-                //     let modalInstance = bootstrap.Modal.getInstance(modal[0]);
-                //     if (modalInstance) {
-                //         modalInstance.hide();
-                //     }
-                //     window.notyf.error(data.message);
-                // }
             },
             complete: function () {
                 // Restore button

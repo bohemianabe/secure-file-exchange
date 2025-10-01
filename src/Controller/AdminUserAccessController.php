@@ -60,7 +60,7 @@ class AdminUserAccessController extends AbstractController
             'firm' => $firm,
             'storage_plans' => $this->_fetchAll(StoragePlans::class),
             'states' => $this->_fetchAll(States::class),
-            'modals_to_include' => ['adminToggleFirmStatus.html.twig', 'defaultTemplate.html.twig']
+            'modals_to_include' => ['adminToggleFirmStatus.html.twig', 'adminAddNewFirmUserProfile.html.twig', 'defaultTemplate.html.twig']
         ]);
     }
 
@@ -132,6 +132,12 @@ class AdminUserAccessController extends AbstractController
         return $this->redirect($request->headers->get('referer'));
     }
 
+
+    //*
+    //
+    // ag: ********************************************** ajax calls below here **********************************
+    //
+    //*
     #[Route('/admin/download-firm-import-csv', name: 'admin_download_firm_import_template_csv')]
     #[Route('/admin/firm-import-csv/submit', name: 'admin_firm_import_submit', methods: ['POST'])]
     public function adminImportFirmDownload(Request $request, ManagerRegistry $registry)
@@ -420,11 +426,6 @@ class AdminUserAccessController extends AbstractController
         );
     }
 
-    //*
-    //
-    // ag: ********************************************** ajax calls below here **********************************
-    //
-    //*
     #[Route('/admin/ajax/new-firm-submit', name: 'admin_new_firm_submit', methods: ['POST'])]
     public function adminNewFirmSubmit(Request $request, SluggerInterface $slugger, ResetPasswordHelperInterface $resetPasswordHelper, MailerInterface $mailer): Response
     {
