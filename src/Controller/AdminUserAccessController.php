@@ -532,7 +532,7 @@ class AdminUserAccessController extends AbstractController
                                 ]);
 
                             $mailer->send($email);
-                        } catch (FileException $e) {
+                        } catch (\Throwable $e) {
                             $errors[] = [
                                 'error_type' => 'New User Welcome Email Failure',
                                 'error_message' => $e->getMessage(),
@@ -685,6 +685,102 @@ class AdminUserAccessController extends AbstractController
                 'success' => false,
                 'message' => 'Failed to send reset email: ' . $e->getMessage(),
             ], 500);
+        }
+    }
+
+    #[Route('/admin/ajax/{firmId}/add-new-firm-user', name: 'admin_add_new_firm_user', methods: ['POST'])]
+    public function adminAddNewFirmUser(Request $request, $firmId, MailerInterface $mailer)
+    {
+        $firm = $this->em->getRepository(Firms::class)->find($firmId);
+        $now = new \DateTime();
+
+        $newUser = new User();
+        $newUserForm = $this->createForm(UserType::class, $newUser);
+        $newUserForm->handleRequest($request);
+
+        // dd($request->request);
+        $errors = array();
+        if ($newUserForm->isSubmitted() && $newUserForm->isValid()) {
+            $newUser->setCreatedDate($now);
+            $newUser->setUpdatedDate($now);
+
+            // ag: add the firstLogin tokens to be used below to send welcome email
+            $newUserToken = ByteString::fromRandom(32)->toString();
+            $newUser->setFirstLoginToken($newUserToken);
+            $newUser->setFirstLoginTokenExpiresAt(new \DateTimeImmutable('+7 days'));
+
+            $this->em->persist($newUser);
+            $this->em->flush($newUser);
+        } else {
+            $errors[] = [
+                'error_type' => 'New User Form Error',
+                'error_message' => iterator_to_array($newUserForm->getErrors(true, true)),
+            ];
+        }
+
+        if ($newUser) {
+            // ag: create firmUserProfile
+            $newFirmUserProfile = new FirmUserProfiles();
+            $newFirmUserProfile->setUser($newUser);
+            $newFirmUserProfile->setFirm($firm);
+
+            $firmUserProfileForm = $this->createForm(FirmUserProfileType::class, $newFirmUserProfile);
+            $firmUserProfileForm->handleRequest($request);
+
+            // dd(iterator_to_array($firmUserProfileForm->getErrors(true, true)));
+            if ($firmUserProfileForm->isSubmitted() && $firmUserProfileForm->isValid()) {
+                $newFirmUserProfile->setCreatedDate($now);
+                $newFirmUserProfile->setUpdatedDate($now);
+
+                $this->em->persist($newFirmUserProfile);
+                $this->em->flush($newFirmUserProfile);
+
+                // ag: once newfirmUserProfile is create send out email to set password
+                try {
+                    $email = (new TemplatedEmail())
+                        ->from($this->params->get('from_email'))
+                        ->to($newUser->getEmail())
+                        ->subject($this->params->get('app_name') . '*****' . 'New User Password Setup' . '*****')
+                        ->htmlTemplate('emails/newUserWelcomeEmail.html.twig')
+                        ->textTemplate('emails/newUserWelcomeEmail.txt.twig')
+                        ->context([
+                            'user' => $newUser,
+                            'setPasswordUrl' => $this->generateUrl('app_set_password', [
+                                'token' => $newUser->getFirstLoginToken(),
+                            ], UrlGeneratorInterface::ABSOLUTE_URL),
+                            'tokenLifetime' => '7 days',
+                        ]);
+
+                    $mailer->send($email);
+                } catch (\Throwable $e) {
+                    $errors[] = [
+                        'error_type' => 'New User Welcome Email Failure',
+                        'error_message' => $e->getMessage(),
+                    ];
+                }
+            } else {
+                $errors[] = [
+                    'error_type' => 'New Firm User Profile Form Error',
+                    'error_message' => iterator_to_array($firmUserProfileForm->getErrors(true, true)),
+                ];
+            }
+        } else {
+            $errors[] = [
+                'error_type' => 'New User Profile Form Error',
+                'error_message' => 'Unable to create new user. Contact an administrator.',
+            ];
+        }
+
+        if (empty($errors)) {
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'New Firm User created.',
+            ]);
+        } else {
+            return new JsonResponse([
+                'success' => false,
+                'message' => $errors[0]['error_type'] . ' - Contact an administrator.',
+            ]);
         }
     }
 }

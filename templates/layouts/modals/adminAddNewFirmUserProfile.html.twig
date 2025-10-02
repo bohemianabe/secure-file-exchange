@@ -61,19 +61,19 @@
                   <div class="mb-3 col-6">
                     <label for="userType" class="form-label">Settings</label>
                     <div class="form-check form-switch">
-                      <input class="form-check-input" name="bulkAction" type="checkbox" value="" id="bulkAction">
+                      <input class="form-check-input checkbox-toggle" name="bulkAction" type="checkbox" value="0" id="bulkAction">
                       <label class="form-check-label" for="bulkAction">
                         Enable Bulk Action
                       </label>
                     </div>
                     <div class="form-check form-switch">
-                      <input class="form-check-input" name="seeAllFiles" type="checkbox" value="" id="seeAllFiles">
+                      <input class="form-check-input checkbox-toggle" name="seeAllFiles" type="checkbox" value="0" id="seeAllFiles">
                       <label class="form-check-label" for="seeAllFiles">
                         Enable See All Files
                       </label>
                     </div>
                     <div class="form-check form-switch">
-                      <input class="form-check-input" name="contactUser" type="checkbox" value="" id="contactUser">
+                      <input class="form-check-input checkbox-toggle" name="contactUser" type="checkbox" value="0" id="contactUser">
                       <label class="form-check-label" for="contactUser">
                         Make this user a contact?
                       </label>
@@ -87,14 +87,17 @@
                   </div>
                 </div>
               </div>
+              </br>
+              <small class="text-danger fst-italic">*<u>Welcome email with password link will be sent to user.</u></small>          
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary" id="admin-add-firm-user-submit">Submit</button>
           <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-          <input type="hidden" id="admin-add-firm-user-profile-token" name="firm_user_profile[_token]" value="{{ csrf_token('firm_user_profile') }}">
-          <input type="hidden" id="admin-add-user-profile-token" name="user[_token]" value="{{ csrf_token('user') }}">
+          <input type="hidden" id="admin-add-firm-user-profile-token"  name="user[_token]" value="{{ csrf_token('user') }}" >
+          <input type="hidden" id="admin-add-user-profile-token" name="firm_user_profile[_token]"value="{{ csrf_token('firm_user_profile') }}">
+          <input type="hidden" id="admin-add-user-firm-id" name="admin-add-user-firm-id" value="{{ firm.getId() }}">
         </div>
       </div>
     </div>

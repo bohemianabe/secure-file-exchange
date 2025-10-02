@@ -24,7 +24,7 @@ security:
                 default_target_path: app_post_login
                 # ag: something weird was happening with login so I added this.
                 always_use_default_target_path: true
-                enable_csrf: false
+                enable_csrf: true
             logout:
                 path: app_logout
                 # where to redirect after logout
