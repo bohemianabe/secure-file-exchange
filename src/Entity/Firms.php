@@ -114,7 +114,7 @@ class Firms
     {
         return $this->name;
     }
-    public function setName(string $name): static
+    public function setName(?string $name): self
     {
         $this->name = $name;
         return $this;
@@ -124,7 +124,7 @@ class Firms
     {
         return $this->addr1;
     }
-    public function setAddr1(string $addr1): static
+    public function setAddr1(?string $addr1): self
     {
         $this->addr1 = $addr1;
         return $this;
@@ -134,7 +134,7 @@ class Firms
     {
         return $this->addr2;
     }
-    public function setAddr2(string $addr2): static
+    public function setAddr2(?string $addr2): self
     {
         $this->addr2 = $addr2;
         return $this;
@@ -144,7 +144,7 @@ class Firms
     {
         return $this->city;
     }
-    public function setCity(string $city): static
+    public function setCity(?string $city): self
     {
         $this->city = $city;
         return $this;
@@ -154,7 +154,7 @@ class Firms
     {
         return $this->state;
     }
-    public function setState(?string $state): static
+    public function setState(?string $state): self
     {
         $this->state = $state;
         return $this;
@@ -164,7 +164,7 @@ class Firms
     {
         return $this->zip;
     }
-    public function setZip(string $zip): static
+    public function setZip(?string $zip): self
     {
         $this->zip = $zip;
         return $this;
@@ -174,7 +174,7 @@ class Firms
     {
         return $this->country;
     }
-    public function setCountry(string $country): static
+    public function setCountry(?string $country): self
     {
         $this->country = $country;
         return $this;
@@ -184,7 +184,7 @@ class Firms
     {
         return $this->phone;
     }
-    public function setPhone(string $phone): static
+    public function setPhone(?string $phone): self
     {
         $this->phone = $phone;
         return $this;
@@ -194,7 +194,7 @@ class Firms
     {
         return $this->logo;
     }
-    public function setLogo(string $logo): static
+    public function setLogo(?string $logo): self
     {
         $this->logo = $logo;
         return $this;
@@ -204,7 +204,7 @@ class Firms
     {
         return $this->active;
     }
-    public function setActive(bool $active): static
+    public function setActive(bool $active): self
     {
         $this->active = $active;
         return $this;
@@ -214,7 +214,7 @@ class Firms
     {
         return $this->account;
     }
-    public function setAccount(string $account): static
+    public function setAccount(?string $account): self
     {
         $this->account = $account;
         return $this;
@@ -224,7 +224,7 @@ class Firms
     {
         return $this->qbbRemovalNum;
     }
-    public function setQbbRemovalNum(int $qbbRemovalNum): static
+    public function setQbbRemovalNum(int $qbbRemovalNum): self
     {
         $this->qbbRemovalNum = $qbbRemovalNum;
         return $this;
@@ -234,7 +234,7 @@ class Firms
     {
         return $this->otherRemovalNum;
     }
-    public function setOtherRemovalNum(int $otherRemovalNum): static
+    public function setOtherRemovalNum(int $otherRemovalNum): self
     {
         $this->otherRemovalNum = $otherRemovalNum;
         return $this;
@@ -244,7 +244,7 @@ class Firms
     {
         return $this->createdDate;
     }
-    public function setCreatedDate(\DateTime $createdDate): static
+    public function setCreatedDate(\DateTime $createdDate): self
     {
         $this->createdDate = $createdDate;
         return $this;
@@ -254,7 +254,7 @@ class Firms
     {
         return $this->updatedDate;
     }
-    public function setUpdatedDate(\DateTime $updatedDate): static
+    public function setUpdatedDate(\DateTime $updatedDate): self
     {
         $this->updatedDate = $updatedDate;
         return $this;
@@ -264,7 +264,7 @@ class Firms
     {
         return $this->storagePlan;
     }
-    public function setStoragePlan(StoragePlans $storagePlan): static
+    public function setStoragePlan(StoragePlans $storagePlan): self
     {
         $this->storagePlan = $storagePlan;
         return $this;

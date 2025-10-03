@@ -55,7 +55,7 @@ class AdminUserAccessController extends AbstractController
     #[Route('/admin/firm-view/{firm}', name: 'admin_firm_view')]
     public function adminFirmViewPage(Request $request, Firms $firm): Response
     {
-        // dd($firm->getFirmUserProfiles());
+        // dd($firm->getFirmUserProfiles()[0]->isFirstTimeUser());
         return $this->render('admin_user_access/firmView.html.twig', [
             'firm' => $firm,
             'storage_plans' => $this->_fetchAll(StoragePlans::class),
@@ -347,6 +347,8 @@ class AdminUserAccessController extends AbstractController
                             // Setup relations
                             $profile->setCreatedDate($now);
                             $profile->setUpdatedDate($now);
+                            // ag: can only upload one user in the CSV so it should be set to primary user
+                            $profile->setUserType('primary');
                             $profile->setFirm($firm);
                             $profile->setUser($user);
 
@@ -572,7 +574,6 @@ class AdminUserAccessController extends AbstractController
     #[Route('/admin/ajax/update-firm-data', name: 'admin_ajax_update_firm_data')]
     public function adminUpdateFirmData(Request $request, SluggerInterface $slugger): Response
     {
-        // dd($request->request);
         $errors = array();
         // ag: process the new firm
         $firmId = $request->request->get('firmId') ?? null;
@@ -585,7 +586,6 @@ class AdminUserAccessController extends AbstractController
         $firmForm->handleRequest($request);
 
         if ($firmForm->isSubmitted() && $firmForm->isValid()) {
-
             // ag: remove old logo file if it exist
             $oldLogo = $updatedFirm->getLogo();
             if ($oldLogo && $firmForm->get('logo')->getData()) {
@@ -685,6 +685,58 @@ class AdminUserAccessController extends AbstractController
                 'success' => false,
                 'message' => 'Failed to send reset email: ' . $e->getMessage(),
             ], 500);
+        }
+    }
+
+    #[Route('/admin/ajax/send-firm-user-welcome-email', name: 'admin_ajax_send_firm_user_welcome_email', methods: ['POST'])]
+    public function adminSendFirmUserWelcomeEmail(Request $request, MailerInterface $mailer): Response
+    {
+
+        $firmUserProfile = $this->em->getRepository(FirmUserProfiles::class)->find($request->request->get('firmUserProfileId'));
+        $user = $firmUserProfile->getUser();
+        $errors = array();
+
+        // ag: add the firstLogin tokens to be used below to send welcome email
+        $newUserToken = ByteString::fromRandom(32)->toString();
+        $user->setFirstLoginToken($newUserToken);
+        $user->setFirstLoginTokenExpiresAt(new \DateTimeImmutable('+7 days'));
+
+        $this->em->persist($user);
+        $this->em->flush($user);
+
+        try {
+            $email = (new TemplatedEmail())
+                ->from($this->params->get('from_email'))
+                ->to($user->getEmail())
+                ->subject($this->params->get('app_name') . '*****' . 'New User Password Setup' . '*****')
+                ->htmlTemplate('emails/newUserWelcomeEmail.html.twig')
+                ->textTemplate('emails/newUserWelcomeEmail.txt.twig')
+                ->context([
+                    'user' => $user,
+                    'setPasswordUrl' => $this->generateUrl('app_set_password', [
+                        'token' => $user->getFirstLoginToken(),
+                    ], UrlGeneratorInterface::ABSOLUTE_URL),
+                    'tokenLifetime' => '7 days',
+                ]);
+
+            $mailer->send($email);
+        } catch (\Throwable $e) {
+            $errors[] = [
+                'error_type' => 'New User Welcome Email Failure',
+                'error_message' => $e->getMessage(),
+            ];
+        }
+
+        if (empty($errors)) {
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Welcome Email Sent!'
+            ]);
+        } else {
+            return new JsonResponse([
+                'success' => false,
+                'message' => $errors[0]['error_message'],
+            ]);
         }
     }
 

@@ -71,6 +71,20 @@ class FirmUserProfiles
         return $this->userType == 'primary';
     }
 
+    public function isFirstTimeUser(): bool
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return false;
+        }
+
+        $passwordEmpty = empty($user->getPassword());
+        $tokenEmpty = empty($user->getFirstLoginToken());
+
+        return $passwordEmpty && $tokenEmpty;
+    }
+
     // ****************************** ag: setters and getters **********************************************
     public function getId(): ?int
     {

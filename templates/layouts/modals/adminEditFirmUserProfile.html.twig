@@ -88,13 +88,24 @@
               <input type="hidden" id="admin-firm-user-profile-token" name="firm_user_profile[_token]" value="{{ csrf_token('firm_user_profile') }}">
               {# <input type="hidden" id="admin-user-profile-token" name="user[_token]" value="{{ csrf_token('user') }}"> #}
           </form>
-          </br>
-          <small class="text-muted fst-italic">*<u>Reset Password</u> will email user to reset their password</small>
+          {% if firmUserProfile.isFirstTimeUser() is true %}
+            </br>
+            <small class="text-muted fst-italic">*Looks like user has not set up their password yet.</small>
+          {% else %}
+            </br>
+            <small class="text-muted fst-italic">*<u>Reset Password</u> will email user to reset their password</small>
+          {% endif %}
         </div>
         <div class="modal-footer col-12 flex-nowrap justify-content-start">
-          <div class="col-6">
-            <a class="btn btn-danger" id="admin-reset-firm-user-password" data-firm-user-id="{{ firmUserProfile.getId() }}">Reset Password</a>
-          </div>
+          {% if firmUserProfile.isFirstTimeUser() is true %}
+            <div class="col-6">
+              <a class="btn btn-warning text-white" id="admin-send-firm-user--welcome-email" data-firm-user-id="{{ firmUserProfile.getId() }}">Send Welcome Email</a>
+            </div>
+          {% else %}
+            <div class="col-6">
+              <a class="btn btn-danger" id="admin-reset-firm-user-password" data-firm-user-id="{{ firmUserProfile.getId() }}">Reset Password</a>
+            </div>
+          {% endif %}
 
           <div class="col-6 d-flex justify-content-end pe-3">
             <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Cancel</button>

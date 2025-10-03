@@ -43,7 +43,7 @@ function validateFormFields(selector, firmAccountUrl = null) {
 }
 
 // ag: function to handle returned ajax data
-function handleAjaxReturnedData(data, btnObject) {
+function handleAjaxReturnedData(data, btnObject, pageReload = true) {
     let modal = btnObject.closest('.modal');
     let modalInstance = bootstrap.Modal.getInstance(modal[0]);
 
@@ -56,15 +56,16 @@ function handleAjaxReturnedData(data, btnObject) {
 
         // optional: also clear file input preview if you have one
         $(modal).find('input[type="file"]').val('');
-        // bootstrap 5 API: hide modal
         if (modalInstance) {
             modalInstance.hide();
         }
         // ag: window.notyf set globally in root app.js file
         window.notyf.success(data.message);
-        setTimeout(function () {
-            window.location.reload();
-        }, 4000);
+        if (pageReload) {
+            setTimeout(function () {
+                window.location.reload();
+            }, 4000);
+        }
     } else {
         // ag: if fail don't close modal. keep open for users descretion
         // if (modalInstance) {
@@ -90,25 +91,54 @@ if (document.getElementById('clear-file-input')) {
 
 // ag: since button is in a modal that isn't visible must pass function to the DOM
 $(document).on('click', '#admin-reset-firm-user-password', function (e) {
+    const btn = $(this);
     const firmUserProfileId = e.currentTarget.getAttribute('data-firm-user-id');
 
     $.ajax({
-        url: `/admin/ajax/reset-firm-user-password/`,
-        METHOD: 'POST',
+        url: `/admin/ajax/send-firm-user-password`,
+        method: 'POST',
         data: {
             firmUserProfileId: firmUserProfileId,
         },
         // processData: false,
         // contentType: false,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        // headers: { 'X-Requested-With': 'XMLHttpRequest' },
         success(data) {
-            if (data.success) {
-                // ag: window.notyf set globally in root app.js file
-                window.notyf.success(data.message);
-            } else {
-                // ag: if update failed don't refresh the page. no need.
-                window.notyf.error(data.message);
-            }
+            handleAjaxReturnedData(data, btn, false);
+            // if (data.success) {
+            //     // ag: window.notyf set globally in root app.js file
+            //     window.notyf.success(data.message);
+            // } else {
+            //     // ag: if update failed don't refresh the page. no need.
+            //     window.notyf.error(data.message);
+            // }
+        },
+    });
+});
+
+// ag: since button is in a modal that isn't visible must pass function to the DOM
+$(document).on('click', '#admin-send-firm-user--welcome-email', function (e) {
+    const btn = $(this);
+    const firmUserProfileId = e.currentTarget.getAttribute('data-firm-user-id');
+
+    $.ajax({
+        url: `/admin/ajax/send-firm-user-welcome-email`,
+        method: 'POST',
+        data: {
+            firmUserProfileId: firmUserProfileId,
+        },
+        // processData: false,
+        // contentType: false,
+        // headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        success(data) {
+            handleAjaxReturnedData(data, btn, false);
+            // if (data.success) {
+            //     // ag: window.notyf set globally in root app.js file
+            //     window.notyf.success(data.message);
+            // } else {
+            //     // ag: if update failed don't refresh the page. no need.
+            //     window.notyf.error(data.message);
+            // }
         },
     });
 });
@@ -371,10 +401,10 @@ jQuery(function ($) {
     $('#admin-view-firm-update').on('click', function (e) {
         const firmAccountUrl = $('#accountName').val();
         // ag: add firmAccountUrl as second param so it can validate the input with regex
-        tokenFirm = $('#admin-update-firm-token').val();
-        firmId = $('#admin-update-firm-id').val();
+        const tokenFirm = $('#admin-update-firm-token').val();
+        const firmId = $('#admin-update-firm-id').val();
 
-        formValid = validateFormFields('#admin-view-firm-form input, #admin-view-firm-form select', firmAccountUrl);
+        const formValid = validateFormFields('#admin-view-firm-form input, #admin-view-firm-form select', firmAccountUrl);
 
         const firmForm = document.querySelector('#admin-view-firm-form');
 
