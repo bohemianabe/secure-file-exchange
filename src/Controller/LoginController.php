@@ -41,7 +41,7 @@ class LoginController extends AbstractController
     #[Route('/post-login', name: 'app_post_login')]
     public function postLogin(Security $security): Response
     {
-
+        // dd($this->isGranted('ROLE_ADMIN'));
         if (!$security->getUser()) {
             return $this->redirectToRoute('app_login');
         }
@@ -51,7 +51,7 @@ class LoginController extends AbstractController
             $this->isGranted('ROLE_ADMIN')  => 'admin_dashboard',
             $this->isGranted('ROLE_FIRM')   => 'firm_dashboard',
             $this->isGranted('ROLE_CLIENT') => 'client_dashboard',
-            default                         => 'app_login',
+            // default                         => 'app_login',
         });
     }
 

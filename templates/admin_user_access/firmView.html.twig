@@ -170,54 +170,90 @@
 
 
     <div class="container card py-4 {% if not firm.getActive() %}border-danger bg-light{% endif %}">
-
         {% if not firm.getActive() %}
             <fieldset disabled>
         {% endif %}
 
-        <div class="row d-flex justify-space-between">
-            <div class="col-6 d-flex align-items-center gap-2 mb-3">
-                <i class="fas fa-user fa-lg text-secondary me-2" style="font-size:2rem;"></i>
-                <h2 class="mb-0">Firm Users</h2>
-            </div>
-            <div class="col-6 d-flex align-items-center justify-content-end gap-2 mb-3">
-                <a class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#adminAddNewFirmUserModal" >Add Firm User
-                </a>
-            </div>
-        </div>
+        <ul class="nav nav-tabs" id="userTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="firm-tab" data-bs-toggle="tab" data-bs-target="#firmUsers" type="button" role="tab">
+                Firm Users
+            </button>
+            </li>
+            <li class="nav-item" role="presentation">
+            <button class="nav-link" id="client-tab" data-bs-toggle="tab" data-bs-target="#clientUsers" type="button" role="tab">
+                Client Users
+            </button>
+            </li>
+        </ul>
 
+        <div class="tab-content mt-3" id="userTabsContent">
+            <div class="tab-pane fade show active" id="firmUsers" role="tabpanel" aria-labelledby="firm-tab">
+                <div class="row d-flex justify-space-between">
+                    <div class="col-6 d-flex align-items-center gap-2 mb-3">
+                        <i class="fas fa-user fa-lg text-secondary me-2" style="font-size:2rem;"></i>
+                        <h2 class="mb-0">Firm Users</h2>
+                    </div>
+                    <div class="col-6 d-flex align-items-center justify-content-end gap-2 mb-3">
+                        <a class="btn btn-primary text-white" data-bs-toggle="modal" data-bs-target="#adminAddNewFirmUserModal" >Add Firm User
+                        </a>
+                    </div>
+                </div>
 
-        <div class="row card-body ">
-            <table id="adminFirmViewTable" class="table table-striped table-bordered align-middle">
-                <thead>
+                <div class="row card-body ">
+                    <table id="adminFirmViewTable" class="table table-striped table-bordered align-middle">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Title</th>
+                                <th>Phone</th>
+                                <th>User Type</th>
+                                <th>Status</th>
+                                <th>Edit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in firm.getFirmUserProfiles() %}
+                            <tr class="bg-accent">
+                                <td>{{ user.getId() }}</td>
+                                <td>{{ user.getFirstName() }} {{ user.getLastName() }}</td>
+                                <td>{{ user.getUser().getEmail() }}</td>
+                                <td>{{ user.getTitle() }}</td>
+                                <td>{{ user.getPhone() }}</td>
+                                <td>{{ user.getUserType() }}</td>
+                                <td>{% if user.getUser().getIsActive() is true %}Active{% else %}Inactive{% endif %}</td>
+                                <td class="text-center">
+                                    <a class="btn btn-warning text-white" href="{{ path('admin_firm_user_modal', { firmUserProfileId: user.getId() })}}" data-bs-toggle="modal" data-modal-title="Edit Firm User Profile" data-bs-target="adminEditFirmUserModal" data-dynamic-load="true">Edit</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <!-- Client Users Table -->
+            <div class="tab-pane fade" id="clientUsers" role="tabpanel" aria-labelledby="client-tab">
+                <table id="clientUserProfiles" class="table table-striped table-bordered" style="width:100%">
+                    <thead>
                     <tr>
-                        <th>Id</th>
-                        <th>Name</th>
+                        <th>ID</th>
                         <th>Email</th>
-                        <th>Title</th>
-                        <th>Phone</th>
-                        <th>User Type</th>
+                        <th>Firm</th>
                         <th>Status</th>
-                        <th>Edit</th>
                     </tr>
-                </thead>
-                <tbody>
-                    {% for user in firm.getFirmUserProfiles() %}
-                    <tr class="bg-accent">
-                        <td>{{ user.getId() }}</td>
-                        <td>{{ user.getFirstName() }} {{ user.getLastName() }}</td>
-                        <td>{{ user.getUser().getEmail() }}</td>
-                        <td>{{ user.getTitle() }}</td>
-                        <td>{{ user.getPhone() }}</td>
-                        <td>{{ user.getUserType() }}</td>
-                        <td>{% if user.getUser().getIsActive() is true %}Active{% else %}Inactive{% endif %}</td>
-                        <td class="text-center">
-                            <a class="btn btn-warning text-white" href="{{ path('admin_firm_user_modal', { firmUserProfileId: user.getId() })}}" data-bs-toggle="modal" data-modal-title="Edit Firm User Profile" data-bs-target="adminEditFirmUserModal" data-dynamic-load="true">Edit</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    <!-- Example Data -->
+                    <tr><td>10</td><td>client1@example.com</td><td>Firm A</td><td>Active</td></tr>
+                    <tr><td>11</td><td>client2@example.com</td><td>Firm B</td><td>Inactive</td></tr>
+                    </tbody>
+                </table>
+            </div>            
+
         </div>
         {# ag: disables all input fields if firm is inactive #}
         {% if not firm.getActive() %}

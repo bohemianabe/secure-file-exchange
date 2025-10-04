@@ -16,6 +16,7 @@ use App\Entity\User;
 use App\Form\FirmType;
 use App\Form\FirmUserProfileType;
 use App\Form\UserType;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -130,6 +131,20 @@ class AdminUserAccessController extends AbstractController
         $this->em->flush($firm);
 
         return $this->redirect($request->headers->get('referer'));
+    }
+
+    // *
+    // 
+    // ag: ******************************************* administrator view page *********************************
+    #[Route('/admin/administrator-view/', name: 'admin_administrator_view')]
+    public function adminAdministratorDashboard(Request $request, UserRepository $userRepo): Response
+    {
+        // ag: get all the admins
+        // dd($userRepo->findByRoles(['ROLE_ADMIN']));
+        return $this->render('admin_user_access/administratorDashboard.html.twig', [
+            'admins' => $userRepo->findByRoles(['ROLE_ADMIN']),
+            'modals_to_include' => [],
+        ]);
     }
 
 

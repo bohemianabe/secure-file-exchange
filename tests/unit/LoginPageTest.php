@@ -24,7 +24,7 @@ class LoginPageTest extends WebTestCase
     public function testLoginWithValidCredentials(): void
     {
         $client = static::createClient();
-        $client->disableReboot();
+        // $client->disableReboot();
 
         $crawler = $client->request('GET', '/login');
 
@@ -33,11 +33,19 @@ class LoginPageTest extends WebTestCase
             '_password' => 'supersecret',
         ]);
         $client->submit($form);
-
-        dd($client);
-
         // Symfony redirects to /post-login (your config)
         $this->assertResponseRedirects('/post-login');
+
+        // Follow redirect and land on dashboard
+        $crawler = $client->followRedirect();
+
+        dd($crawler);
+        // dd($crawler);
+        // dd([
+        //     'status' => $client->getResponse()->getStatusCode(),
+        //     'uri' => $client->getRequest()->getUri(),
+        //     'content' => $client->getResponse()->getContent(),
+        // ]);
 
         // Follow redirect and land on dashboard
         $crawler = $client->followRedirect();

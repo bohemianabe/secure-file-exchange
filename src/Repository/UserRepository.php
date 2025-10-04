@@ -33,6 +33,66 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
+    /**
+     * Find users by one or more roles.
+     *
+     * Example:
+     *   $userRepo->findByRoles(['ROLE_ADMIN', 'ROLE_FIRM']);
+     */
+    public function findByRoles(array $roles): array
+    {
+
+        $conn = $this->getEntityManager()->getConnection();
+
+        // Build dynamic WHERE clause with JSON_CONTAINS
+        $conditions = [];
+        $params = [];
+        foreach ($roles as $index => $role) {
+            $param = ":role{$index}";
+            $conditions[] = "JSON_CONTAINS(u.roles, $param) = 1";
+            $params[$param] = json_encode($role);
+        }
+
+        $sql = sprintf(
+            'SELECT * FROM users u WHERE %s',
+            implode(' OR ', $conditions)
+        );
+
+        $stmt = $conn->prepare($sql);
+        $result = $stmt->executeQuery($params)->fetchAllAssociative();
+
+        // Hydrate array results into User entities
+        return $this->getEntityManager()
+            ->getRepository(User::class)
+            ->createQueryBuilder('u')
+            ->where('u.id IN (:ids)')
+            ->setParameter('ids', array_column($result, 'id'))
+            ->getQuery()
+            ->getResult();
+
+        // ag: commented out logic would return a plain array
+        // $conn = $this->getEntityManager()->getConnection();
+
+        // // Build OR conditions for each role
+        // $conditions = [];
+        // foreach ($roles as $i => $role) {
+        //     $conditions[] = "JSON_CONTAINS(u.roles, :role{$i})";
+        // }
+
+        // $sql = sprintf(
+        //     'SELECT * FROM users u WHERE %s',
+        //     implode(' OR ', $conditions)
+        // );
+
+        // $stmt = $conn->prepare($sql);
+
+        // foreach ($roles as $i => $role) {
+        //     $stmt->bindValue("role{$i}", json_encode($role));
+        // }
+
+        // return $stmt->executeQuery()->fetchAllAssociative();
+    }
+
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */
